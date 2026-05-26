@@ -12,7 +12,7 @@ plugins {
 android {
     namespace = "com.caffenio.caffenio"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         // SOLUCIÓN AL ERROR: Activamos desugaring para compatibilidad con librerías de notificaciones
