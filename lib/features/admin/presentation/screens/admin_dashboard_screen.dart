@@ -1,18 +1,18 @@
+import 'package:caffenio/core/constants/firebase_constants.dart';
 import 'package:caffenio/core/constants/route_constants.dart';
 import 'package:caffenio/core/theme/app_border_radius.dart';
 import 'package:caffenio/core/theme/app_spacing.dart';
-import 'package:caffenio/features/admin/presentation/screens/sucursales_screen.dart';
-import 'package:caffenio/features/admin/presentation/screens/promotions_screen.dart';
-import 'package:caffenio/features/admin/presentation/screens/inventory_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/employees_screen.dart';
-import 'package:caffenio/features/admin/presentation/screens/suppliers_screen.dart';
+import 'package:caffenio/features/admin/presentation/screens/inventory_screen.dart';
+import 'package:caffenio/features/admin/presentation/screens/promotions_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/purchase_orders_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:caffenio/core/constants/firebase_constants.dart';
+import 'package:caffenio/features/admin/presentation/screens/sucursales_screen.dart';
+import 'package:caffenio/features/admin/presentation/screens/suppliers_screen.dart';
 import 'package:caffenio/features/auth/presentation/providers/auth_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -58,7 +58,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   Future<Map<String, dynamic>> _calculateDailyMetrics() async {
     final today = DateTime.now();
-    final startOfDay = DateTime(today.year, today.month, today.day, 0, 0);
+    final startOfDay = DateTime(today.year, today.month, today.day);
     final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
 
     final snapshot = await FirebaseFirestore.instance

@@ -1,15 +1,14 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-
 import 'package:caffenio/core/theme/app_border_radius.dart';
 import 'package:caffenio/core/theme/app_colors.dart';
 import 'package:caffenio/core/theme/app_spacing.dart';
 import 'package:caffenio/core/theme/app_typography.dart';
 import 'package:caffenio/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 /// Pantalla de registro de nueva cuenta.
 class RegisterScreen extends StatefulWidget {

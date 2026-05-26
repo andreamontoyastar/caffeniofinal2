@@ -1,3 +1,4 @@
+import 'package:caffenio/core/constants/route_constants.dart';
 import 'package:caffenio/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/admin_product_form_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/admin_products_screen.dart';
@@ -20,10 +21,9 @@ import 'package:caffenio/features/orders/presentation/screens/user_orders_screen
 import 'package:caffenio/features/profile/presentation/screens/profile_screen.dart';
 import 'package:caffenio/shared/models/order_model.dart';
 import 'package:caffenio/shared/models/product_model.dart';
-import 'package:caffenio/core/constants/route_constants.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 // Scaffold Principal con el BottomNavigationBar reactivo
 class MainShellScaffold extends StatelessWidget {
