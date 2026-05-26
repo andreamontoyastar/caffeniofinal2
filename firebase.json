@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"caffenio-prod","appId":"1:549630566199:android:fb44428b237097cef3c4b2","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"caffenio-prod","configurations":{"android":"1:549630566199:android:fb44428b237097cef3c4b2","ios":"1:549630566199:ios:d921f5d996c54673f3c4b2"}}}}}}
