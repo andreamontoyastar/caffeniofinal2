@@ -1,9 +1,9 @@
+import 'package:caffenio/core/constants/firebase_constants.dart';
 import 'package:caffenio/core/theme/app_spacing.dart';
-import 'package:caffenio/features/catalog/presentation/providers/product_provider.dart';
 import 'package:caffenio/shared/models/product_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 class AdminProductFormScreen extends StatefulWidget {
   final ProductModel? product;
@@ -28,6 +28,8 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
   final _milkPriceControllers = <TextEditingController>[];
   final _extraNameControllers = <TextEditingController>[];
   final _extraPriceControllers = <TextEditingController>[];
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -81,14 +83,6 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
     if (_sizeNameControllers.isEmpty) {
       _sizeNameControllers.add(TextEditingController());
       _sizePriceControllers.add(TextEditingController(text: '0.00'));
-    }
-    if (_milkNameControllers.isEmpty) {
-      _milkNameControllers.add(TextEditingController());
-      _milkPriceControllers.add(TextEditingController(text: '0.00'));
-    }
-    if (_extraNameControllers.isEmpty) {
-      _extraNameControllers.add(TextEditingController());
-      _extraPriceControllers.add(TextEditingController(text: '0.00'));
     }
   }
 
@@ -186,12 +180,6 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                     decoration: InputDecoration(
                       labelText: 'Opción #${index + 1}',
                     ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Ingresa un nombre para esta opción';
-                      }
-                      return null;
-                    },
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -253,7 +241,11 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final provider = context.read<ProductProvider>();
+
+    setState(() {
+      _isLoading = true;
+    });
+
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
     final price =
@@ -274,6 +266,9 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
         'Ingresa la categoría del producto.',
         color: Theme.of(context).colorScheme.error,
       );
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -282,6 +277,9 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
         'Ingresa un tiempo de preparación válido.',
         color: Theme.of(context).colorScheme.error,
       );
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -290,6 +288,9 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
         'Agrega al menos una opción de tamaño.',
         color: Theme.of(context).colorScheme.error,
       );
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -306,20 +307,29 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
       extras: extras,
     );
 
-    if (widget.product == null) {
-      await provider.addProduct(product);
-    } else {
-      await provider.updateProduct(product);
-    }
-
-    if (mounted && provider.errorMessage == null) {
-      context.pop();
+    try {
+      if (widget.product == null) {
+        await FirebaseFirestore.instance.collection(FirebaseConstants.productsCollection).add(product.toMap());
+      } else {
+        await FirebaseFirestore.instance.collection(FirebaseConstants.productsCollection).doc(product.id).update(product.toMap());
+      }
+      if (mounted) {
+        context.pop();
+      }
+    } catch (e) {
+      _showSnackBar(
+        'Error al guardar el producto: $e',
+        color: Theme.of(context).colorScheme.error,
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ProductProvider>();
     final isEditing = widget.product != null;
     final title = isEditing ? 'Editar producto' : 'Agregar producto';
     final theme = Theme.of(context);
@@ -364,7 +374,7 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
                   labelText: 'Precio',
-                  prefixText: ' 24',
+                  prefixText: '\$',
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -441,18 +451,9 @@ class _AdminProductFormScreenState extends State<AdminProductFormScreen> {
                 addLabel: 'Agregar extra',
               ),
               const SizedBox(height: AppSpacing.lg),
-              if (provider.errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: Text(
-                    provider.errorMessage!,
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.colorScheme.error),
-                  ),
-                ),
               ElevatedButton(
-                onPressed: provider.isActionLoading ? null : _submit,
-                child: provider.isActionLoading
+                onPressed: _isLoading ? null : _submit,
+                child: _isLoading
                     ? const SizedBox(
                         height: 20,
                         width: 20,

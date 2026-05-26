@@ -606,10 +606,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   /// Crea o actualiza el documento users/{uid} en Firestore.
   Future<void> _createUserDocument(UserModel user) async {
+    final userData = user.toNewUserJson();
+    // REGLA DE NEGOCIO: Todo nuevo usuario se crea con el rol 'customer'.
+    userData[FirebaseConstants.fieldUserRole] = 'customer';
+
     await _firestore
         .collection(FirebaseConstants.usersCollection)
         .doc(user.uid)
-        .set(user.toNewUserJson(), SetOptions(merge: true));
+        .set(userData, SetOptions(merge: true));
   }
 
   Future<void> _sendWelcomeNotification(String uid) async {
@@ -638,9 +642,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (!doc.exists) {
       await ref.set({
         FirebaseConstants.fieldUid: uid,
-        FirebaseConstants.fieldLoyaltyPoints: AppConstants.welcomeBonusPoints,
-        FirebaseConstants.fieldLoyaltyTotalEarned:
-            AppConstants.welcomeBonusPoints,
+        // REGLA DE NEGOCIO: Iniciar con 0 puntos.
+        FirebaseConstants.fieldLoyaltyPoints: 0,
+        FirebaseConstants.fieldLoyaltyTotalEarned: 0,
         FirebaseConstants.fieldLoyaltyTotalRedeemed: 0,
         FirebaseConstants.fieldLoyaltyLevel: 'bronze',
         FirebaseConstants.fieldCreatedAt: FieldValue.serverTimestamp(),

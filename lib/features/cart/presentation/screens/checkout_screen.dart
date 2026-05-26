@@ -10,6 +10,8 @@ import 'package:caffenio/features/notifications/data/notifications_remote_dataso
 import 'package:caffenio/features/orders/domain/usecases/place_order.dart';
 import 'package:caffenio/features/orders/presentation/providers/order_provider.dart';
 import 'package:caffenio/shared/models/order_model.dart';
+import 'package:caffenio/shared/models/sucursal_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -29,21 +31,29 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   DeliveryType _deliveryType = DeliveryType.toGo;
   PaymentMethod _paymentMethod = PaymentMethod.card;
+  String? _selectedBranchId;
   bool _isProcessing = false;
 
   static const double _taxRate = 0.16;
 
   Future<void> _confirmOrder(BuildContext context) async {
+    if (_deliveryType == DeliveryType.toGo && _selectedBranchId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, selecciona una sucursal para recoger.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     setState(() => _isProcessing = true);
 
-    // Capturar providers y router ANTES del await para evitar uso de context
-    // a través de gaps asíncronos (use_build_context_synchronously)
     final cart = context.read<CartProvider>();
     final orderProvider = context.read<OrderProvider>();
     final authProvider = context.read<AuthProvider>();
     final router = GoRouter.of(context);
 
-    // Simular un breve retraso de procesamiento
     await Future<void>.delayed(const Duration(milliseconds: 800));
 
     if (!mounted) return;
@@ -54,6 +64,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       deliveryType: _deliveryType,
       paymentMethod: _paymentMethod,
       userId: authProvider.currentUser?.uid,
+      branchId: _selectedBranchId,
     );
 
     final userId = authProvider.currentUser?.uid;
@@ -112,7 +123,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Resumen de productos ──────────────────────────────────────
             _SectionCard(
               title: 'Resumen del Pedido',
               icon: Icons.receipt_long_outlined,
@@ -176,70 +186,78 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
             const Gap(AppSpacing.md),
 
-            // ── Tipo de entrega ───────────────────────────────────────────
             _SectionCard(
               title: 'Tipo de Entrega',
               icon: Icons.store_outlined,
-              child: Row(
-                children: DeliveryType.values.map((type) {
-                  final selected = _deliveryType == type;
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _deliveryType = type),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? AppColors.primaryContainer
-                                : AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: selected
-                                  ? AppColors.primary
-                                  : Colors.transparent,
-                              width: 2,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                type == DeliveryType.inStore
-                                    ? Icons.store
-                                    : Icons.takeout_dining_outlined,
+              child: Column(
+                children: [
+                  Row(
+                    children: DeliveryType.values.map((type) {
+                      final selected = _deliveryType == type;
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () => setState(() => _deliveryType = type),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
                                 color: selected
-                                    ? AppColors.primary
-                                    : AppColors.onSurfaceVariant,
-                                size: 28,
-                              ),
-                              const Gap(AppSpacing.xs),
-                              Text(
-                                type.label,
-                                style: AppTypography.labelMedium.copyWith(
+                                    ? AppColors.primaryContainer
+                                    : AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
                                   color: selected
                                       ? AppColors.primary
-                                      : AppColors.onSurfaceVariant,
-                                  fontWeight: selected
-                                      ? FontWeight.w700
-                                      : FontWeight.normal,
+                                      : Colors.transparent,
+                                  width: 2,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
-                            ],
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    type == DeliveryType.inStore
+                                        ? Icons.store
+                                        : Icons.takeout_dining_outlined,
+                                    color: selected
+                                        ? AppColors.primary
+                                        : AppColors.onSurfaceVariant,
+                                    size: 28,
+                                  ),
+                                  const Gap(AppSpacing.xs),
+                                  Text(
+                                    type.label,
+                                    style: AppTypography.labelMedium.copyWith(
+                                      color: selected
+                                          ? AppColors.primary
+                                          : AppColors.onSurfaceVariant,
+                                      fontWeight: selected
+                                          ? FontWeight.w700
+                                          : FontWeight.normal,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      );
+                    }).toList(),
+                  ),
+                  if (_deliveryType == DeliveryType.toGo)
+                    _BranchSelector(
+                      onChanged: (branchId) {
+                        setState(() => _selectedBranchId = branchId);
+                      },
                     ),
-                  );
-                }).toList(),
+                ],
               ),
             ),
 
             const Gap(AppSpacing.md),
 
-            // ── Método de pago ────────────────────────────────────────────
             _SectionCard(
               title: 'Método de Pago',
               icon: Icons.payment_outlined,
@@ -305,7 +323,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
             const Gap(AppSpacing.xxl),
 
-            // ── Botón Confirmar ───────────────────────────────────────────
             ElevatedButton(
               onPressed: _isProcessing ? null : () => _confirmOrder(context),
               style: ElevatedButton.styleFrom(
@@ -332,9 +349,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Widgets auxiliares
-// ─────────────────────────────────────────────────────────────────────────────
+class _BranchSelector extends StatelessWidget {
+  const _BranchSelector({required this.onChanged});
+
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('sucursales').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final branches = snapshot.data!.docs.map((doc) {
+          return SucursalModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>);
+        }).toList();
+
+        return DropdownButtonFormField<String>(
+          onChanged: onChanged,
+          hint: const Text('Selecciona una sucursal'),
+          items: branches.map((branch) {
+            return DropdownMenuItem(value: branch.id, child: Text(branch.name));
+          }).toList(),
+        );
+      },
+    );
+  }
+}
 
 class _SectionCard extends StatelessWidget {
   const _SectionCard({

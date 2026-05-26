@@ -1,17 +1,16 @@
+import 'package:caffenio/core/constants/firebase_constants.dart';
 import 'package:caffenio/core/constants/route_constants.dart';
 import 'package:caffenio/core/theme/app_spacing.dart';
-import 'package:caffenio/features/catalog/presentation/providers/product_provider.dart';
 import 'package:caffenio/shared/models/product_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 class AdminProductsScreen extends StatelessWidget {
   const AdminProductsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ProductProvider>();
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -27,32 +26,44 @@ class AdminProductsScreen extends StatelessWidget {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: provider.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : provider.errorMessage != null
-                ? Center(
-                    child: Text(
-                      provider.errorMessage!,
-                      style: theme.textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                : provider.products.isEmpty
-                    ? const Center(
-                        child: Text(
-                            'No hay productos en el menú. Agrega uno nuevo.'),
-                      )
-                    : ListView.separated(
-                        itemCount: provider.products.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: AppSpacing.md),
-                        itemBuilder: (context, index) {
-                          final product = provider.products[index];
-                          return _buildProductTile(context, product, provider);
-                        },
-                      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection(FirebaseConstants.productsCollection).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error al cargar los productos.',
+                style: theme.textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          final products = snapshot.data!.docs.map((doc) {
+            return ProductModel.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>);
+          }).toList();
+
+          if (products.isEmpty) {
+            return const Center(
+              child: Text('No hay productos en el menú. Agrega uno nuevo.'),
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            itemCount: products.length,
+            separatorBuilder: (_, __) =>
+                const SizedBox(height: AppSpacing.md),
+            itemBuilder: (context, index) {
+              final product = products[index];
+              return _buildProductTile(context, product);
+            },
+          );
+        },
       ),
     );
   }
@@ -106,7 +117,6 @@ class AdminProductsScreen extends StatelessWidget {
 
   Future<void> _confirmDelete(
     BuildContext context,
-    ProductProvider provider,
     ProductModel product,
   ) async {
     final confirmed = await showDialog<bool>(
@@ -129,7 +139,7 @@ class AdminProductsScreen extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      await provider.deleteProduct(product.id);
+      await FirebaseFirestore.instance.collection(FirebaseConstants.productsCollection).doc(product.id).delete();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('"${product.name}" eliminado.')),
@@ -141,7 +151,6 @@ class AdminProductsScreen extends StatelessWidget {
   Widget _buildProductTile(
     BuildContext context,
     ProductModel product,
-    ProductProvider provider,
   ) {
     final theme = Theme.of(context);
     return Card(
@@ -187,7 +196,7 @@ class AdminProductsScreen extends StatelessWidget {
                 );
                 break;
               case 'delete':
-                _confirmDelete(context, provider, product);
+                _confirmDelete(context, product);
                 break;
             }
           },

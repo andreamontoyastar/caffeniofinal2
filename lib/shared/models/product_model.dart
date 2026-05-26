@@ -133,6 +133,20 @@ class ProductModel extends Equatable {
     };
   }
 
+    Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'description': description,
+      'price': price,
+      'categoryId': categoryId,
+      'preparationTimeMinutes': preparationTimeMinutes,
+      'imageUrl': imageUrl,
+      'sizes': sizes.map((option) => option.toJson()).toList(),
+      'milkTypes': milkTypes.map((option) => option.toJson()).toList(),
+      'extras': extras.map((option) => option.toJson()).toList(),
+    };
+  }
+
   ProductModel copyWith({
     String? id,
     String? name,
