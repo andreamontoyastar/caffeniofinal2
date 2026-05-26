@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isAdmin() {
+      return isAuthenticated() && getUserData().role == 'admin';
+    }
+    function isBarista() {
+      return isAuthenticated() && getUserData().role in ['admin', 'barista'];
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+
+      match /notifications/{notificationId} {
+        allow read, update: if isOwner(userId);
+        allow create: if isAuthenticated() && (isOwner(userId) || isBarista());
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    match /categories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isBarista() || isAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isBarista() || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /loyaltyCards/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAuthenticated() && (isOwner(userId) || isBarista() || isAdmin());
+    }
+
+    match /loyalty/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow write: if isAuthenticated() && (isOwner(userId) || isBarista() || isAdmin());
+    }
+
+    match /branches/{branchId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /sucursales/{sucursalId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /promotions/{promotionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /inventory/{inventoryId} {
+      allow read: if isBarista() || isAdmin();
+      allow write: if isBarista() || isAdmin();
+    }
+  }
+}
