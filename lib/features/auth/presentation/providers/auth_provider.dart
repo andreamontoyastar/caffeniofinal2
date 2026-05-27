@@ -120,6 +120,25 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Inicia sesión de forma local sin Firebase para pruebas y desarrollo.
+  void signInDemo({required String role}) {
+    _beginAction();
+    _currentUser = UserEntity(
+      uid: 'demo_${role}_uid',
+      email: '$role@caffenio.com',
+      displayName: 'Usuario Demo ${role[0].toUpperCase()}${role.substring(1)}',
+      role: role,
+      createdAt: DateTime.now(),
+      emailVerified: true,
+      phone: '5551234567',
+      photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    );
+    _status = AuthStatus.authenticated;
+    _errorMessage = null;
+    _isActionLoading = false;
+    notifyListeners();
+  }
+
   /// Crea una cuenta nueva.
   /// Retorna true si fue exitoso.
   Future<bool> signUp({

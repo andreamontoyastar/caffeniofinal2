@@ -56,49 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await auth.signInWithGoogle();
     if (!success && mounted && auth.errorMessage != null) {
       _showErrorSnackBar(auth.errorMessage!);
-      if (auth.errorCode == 'link-password-required') {
-        _showLinkHintBanner();
-      }
     }
-  }
-
-  Future<void> _linkGoogle() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    FocusScope.of(context).unfocus();
-
-    final auth = context.read<AuthProvider>();
-    final success = await auth.linkGoogleWithEmailPassword(
-      email: _emailController.text,
-      password: _passwordController.text,
-    );
-
-    if (!mounted) return;
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Google vinculado. Ya puedes entrar con correo o con Google.',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else if (auth.errorMessage != null) {
-      _showErrorSnackBar(auth.errorMessage!);
-    }
-  }
-
-  void _showLinkHintBanner() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Escribe tu contraseña y pulsa "Vincular con Google".',
-          style: AppTypography.bodyMedium.copyWith(color: Colors.white),
-        ),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 5),
-      ),
-    );
   }
 
   void _showErrorSnackBar(String message) {
@@ -172,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Colors.white.withOpacity(0.15),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white.withValues(alpha: 0.35),
@@ -266,26 +224,90 @@ class _LoginScreenState extends State<LoginScreen> {
                 // ── Google ────────────────────────────────────────────────
                 _buildGoogleButton(),
                 const Gap(AppSpacing.sm),
-                _buildLinkGoogleButton(),
-                const Gap(AppSpacing.xs),
-                Text(
-                  'Si ya tienes cuenta con correo y quieres usar Google también, '
-                  'escribe tu contraseña y pulsa "Vincular con Google".',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-
+                _buildRegisterButton(),
                 const Gap(AppSpacing.xl),
-
-                // ── Registro ──────────────────────────────────────────────
-                _buildRegisterLink(),
-                const Gap(AppSpacing.md),
+                _buildDemoSection(),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDemoSection() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withAlpha(13),
+        borderRadius: AppBorderRadius.mdAll,
+        border: Border.all(
+          color: AppColors.primary.withAlpha(38),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.flash_on, color: AppColors.primary, size: 18),
+              const Gap(6),
+              Text(
+                'Acceso Rápido (Modo Demo)',
+                style: AppTypography.titleMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const Gap(4),
+          Text(
+            'Entra al instante omitiendo Firebase Auth para probar los distintos roles:',
+            textAlign: TextAlign.center,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const Gap(AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'customer'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  child: const Text('Cliente', style: TextStyle(color: Colors.white, fontSize: 12)),
+                ),
+              ),
+              const Gap(8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'barista'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  child: const Text('Barista', style: TextStyle(color: Colors.white, fontSize: 12)),
+                ),
+              ),
+              const Gap(8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'admin'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  child: const Text('Admin', style: TextStyle(color: Colors.white, fontSize: 12)),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -437,45 +459,25 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLinkGoogleButton() {
-    return Consumer<AuthProvider>(
-      builder: (context, auth, _) {
-        return TextButton(
-          onPressed: auth.isActionLoading ? null : _linkGoogle,
-          child: Text(
-            'Vincular con Google',
-            style: AppTypography.labelLarge.copyWith(
-              color: AppColors.primary,
-            ),
-          ),
-        );
-      },
+  Widget _buildRegisterButton() {
+    return OutlinedButton(
+      onPressed: () => context.push(RouteConstants.register),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        side: const BorderSide(color: AppColors.primary),
+        minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
+        shape: const RoundedRectangleBorder(
+          borderRadius: AppBorderRadius.button,
+        ),
+      ),
+      child: Text(
+        'Registrarse',
+        style: AppTypography.button.copyWith(
+          color: AppColors.primary,
+        ),
+      ),
     );
   }
 
-  Widget _buildRegisterLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          '¿No tienes cuenta?',
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.onSurfaceVariant,
-          ),
-        ),
-        TextButton(
-          onPressed: () => context.push(RouteConstants.register),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-          ),
-          child: Text(
-            'Regístrate',
-            style: AppTypography.labelLarge.copyWith(
-              color: AppColors.primary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 }

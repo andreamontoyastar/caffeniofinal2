@@ -1,0 +1,142 @@
++{
+  "project_info": {
+    "project_number": "549630566199",
+    "project_id": "caffenio-prod",
+    "storage_bucket": "caffenio-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549630566199:android:fb44428b237097cef3c4b2",
+        "android_client_info": {
+          "package_name": "com.caffenio.caffenio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "549630566199-shgalq7uuqohv809o47ov69salimf9e5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.caffenio.caffenio",
+            "certificate_hash": "f8e9e891605a02d6ce64c95ab7dd8bda406fc8e9"
+          }
+        },
+        {
+          "client_id": "549630566199-j6o0edgqdigjmrv78uie1429q52kbnba.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7fAvCwh5tKfpvXI9rqq97OtM-CUyhITY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "549630566199-j6o0edgqdigjmrv78uie1429q52kbnba.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "549630566199-2g6o7bq77b9gums5m9jh79udakflv3ng.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.caffenio.caffenioApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549630566199:android:2d9dba30bf0f9720f3c4b2",
+        "android_client_info": {
+          "package_name": "com.caffenio.caffenio_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "549630566199-99pek7qkksomme3v1k3gtbr1c8v75h3j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.caffenio.caffenio_app",
+            "certificate_hash": "7567a6463642cfa1d3768da8442e56d53dbc41ba"
+          }
+        },
+        {
+          "client_id": "549630566199-j6o0edgqdigjmrv78uie1429q52kbnba.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7fAvCwh5tKfpvXI9rqq97OtM-CUyhITY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "549630566199-j6o0edgqdigjmrv78uie1429q52kbnba.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "549630566199-2g6o7bq77b9gums5m9jh79udakflv3ng.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.caffenio.caffenioApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549630566199:android:8c99707bf880c0d8f3c4b2",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "549630566199-6ln5roa4t1veu7ldv0qi2cc8trvennc4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.myapp",
+            "certificate_hash": "f8e9e891605a02d6ce64c95ab7dd8bda406fc8e9"
+          }
+        },
+        {
+          "client_id": "549630566199-j6o0edgqdigjmrv78uie1429q52kbnba.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7fAvCwh5tKfpvXI9rqq97OtM-CUyhITY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "549630566199-j6o0edgqdigjmrv78uie1429q52kbnba.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "549630566199-2g6o7bq77b9gums5m9jh79udakflv3ng.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.caffenio.caffenioApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

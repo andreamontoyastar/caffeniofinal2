@@ -188,7 +188,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String uid,
     String? displayName,
     String? phone,
-  }) async {
+  ) async {
     try {
       final userRef =
           _firestore.collection(FirebaseConstants.usersCollection).doc(uid);
@@ -238,7 +238,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> signInWithGoogle() async {
     try {
-      // Evita credenciales cacheadas de intentos fallidos anteriores.
       await _googleSignIn.signOut();
 
       final googleAccount = await _googleSignIn.signIn();
@@ -322,7 +321,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> linkGoogleWithEmailPassword({
     required String email,
     required String password,
-  }) async {
+  ) async {
     final trimmedEmail = email.trim().toLowerCase();
     try {
       await _googleSignIn.signOut();
@@ -386,7 +385,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> linkEmailPasswordToCurrentUser({
     required String email,
     required String password,
-  }) async {
+  ) async {
     final user = _auth.currentUser;
     if (user == null) {
       throw const AuthException(
@@ -458,7 +457,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  // ── Helpers privados ──────────────────────────────────────────────────────
+  // ── Helpers privados corregidos ────────────────────────────────────────────
 
   Future<AuthException> _mapRegisterEmailInUse(String email) async {
     final methods = await _fetchSignInMethods(email);
@@ -562,9 +561,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final fallback = UserModel.fromFirebaseUser(firebaseUser);
       try {
         await _createUserDocument(fallback);
-      } catch (_) {
-        // Si Firestore falla, igual entramos con datos de Auth.
-      }
+      } catch (_) {}
       await _safeInitializeLoyalty(firebaseUser.uid);
       if (isNewUser) await _sendWelcomeNotification(firebaseUser.uid);
       return fallback;
@@ -582,7 +579,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   /// Obtiene el documento del usuario desde Firestore.
-  /// Si no existe o el esquema es antiguo, usa Firebase Auth como respaldo.
   Future<UserModel> _fetchUserFromFirestore(User firebaseUser) async {
     final doc = await _firestore
         .collection(FirebaseConstants.usersCollection)
@@ -604,12 +600,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return userModel;
   }
 
-  /// Crea o actualiza el documento users/{uid} en Firestore.
+  /// Crea o actualiza el documento users/{uid} en Firestore de forma segura.
   Future<void> _createUserDocument(UserModel user) async {
+    final Map<String, dynamic> userPayload = {
+      'uid': user.uid,
+      'email': user.email?.toLowerCase().trim(),
+      'displayName': user.displayName?.trim() ?? 'Cliente Caffenio',
+      'phone': user.phone?.trim() ?? '',
+      'role': 'customer', 
+      'status': 'active',
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
     await _firestore
         .collection(FirebaseConstants.usersCollection)
         .doc(user.uid)
-        .set(user.toNewUserJson(), SetOptions(merge: true));
+        .set(userPayload, SetOptions(merge: true));
   }
 
   Future<void> _sendWelcomeNotification(String uid) async {
@@ -619,32 +626,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await notifications.sendToUser(
         uid: uid,
         title: 'Bienvenido a Caffenio',
-        body:
-            'Tu cuenta está lista. Empiezas con 0 puntos; gana puntos con cada pedido.',
+        body: 'Tu cuenta está lista. Empiezas con 0 puntos; gana puntos con cada pedido.',
         type: 'welcome',
       );
-    } catch (_) {
-      // No bloquear registro si falla la notificación.
-    }
+    } catch (_) {}
   }
 
-  /// Inicializa loyaltyCards/{uid} con 0 puntos (plan de implementación).
+  /// Inicializa loyaltyCards/{uid} con 0 puntos estrictos.
   Future<void> _initializeLoyaltyDocument(String uid) async {
     final ref =
         _firestore.collection(FirebaseConstants.loyaltyCollection).doc(uid);
 
-    // Solo crear si no existe
     final doc = await ref.get();
     if (!doc.exists) {
       await ref.set({
-        FirebaseConstants.fieldUid: uid,
-        FirebaseConstants.fieldLoyaltyPoints: AppConstants.welcomeBonusPoints,
-        FirebaseConstants.fieldLoyaltyTotalEarned:
-            AppConstants.welcomeBonusPoints,
-        FirebaseConstants.fieldLoyaltyTotalRedeemed: 0,
-        FirebaseConstants.fieldLoyaltyLevel: 'bronze',
-        FirebaseConstants.fieldCreatedAt: FieldValue.serverTimestamp(),
-        FirebaseConstants.fieldUpdatedAt: FieldValue.serverTimestamp(),
+        'uid': uid,
+        'points': 0, 
+        'totalEarned': 0,
+        'totalRedeemed': 0,
+        'level': 'bronze',
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
       });
     }
   }

@@ -6,6 +6,7 @@ import 'package:caffenio/features/cart/presentation/providers/cart_provider.dart
 import 'package:caffenio/features/catalog/domain/repositories/product_repository.dart';
 import 'package:caffenio/features/catalog/presentation/providers/product_provider.dart';
 import 'package:caffenio/features/orders/presentation/providers/order_provider.dart';
+import 'package:caffenio/features/seed/seed_data.dart';
 import 'package:caffenio/features/settings/presentation/providers/settings_provider.dart';
 import 'package:caffenio/firebase_options.dart';
 import 'package:caffenio/navigation/app_router.dart';
@@ -17,13 +18,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Inicializar Firebase (manejo de inicialización duplicada del lado nativo)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    // Firebase ya fue inicializado por el lado nativo de Android; ignorar.
+  }
 
   // Inicializar localizador de servicios (DI)
   await setupServiceLocator();
+
+  // Insertar datos de ejemplo en Firestore (solo la primera vez)
+  await SeedData.seedIfNeeded();
 
   runApp(
     MultiProvider(
