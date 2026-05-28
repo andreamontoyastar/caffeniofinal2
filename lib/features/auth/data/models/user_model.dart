@@ -19,7 +19,6 @@ class UserModel extends UserEntity {
     super.photoURL,
     super.phone,
     super.sucursalId,
-    super.address,
   });
 
   // ── Factories ─────────────────────────────────────────────────────────────
@@ -45,7 +44,6 @@ class UserModel extends UserEntity {
       role: _readString(json, FirebaseConstants.fieldUserRole) ??
           AppConstants.roleCustomer,
       sucursalId: _readString(json, FirebaseConstants.fieldUserBranchId),
-      address: _readString(json, FirebaseConstants.fieldUserAddress),
       createdAt: createdAt,
       emailVerified: json['emailVerified'] as bool? ?? false,
     );
@@ -104,7 +102,6 @@ class UserModel extends UserEntity {
       FirebaseConstants.fieldUserPhone: phone ?? '',
       FirebaseConstants.fieldUserRole: role,
       FirebaseConstants.fieldUserBranchId: sucursalId,
-      FirebaseConstants.fieldUserAddress: address,
       FirebaseConstants.fieldCreatedAt: Timestamp.fromDate(createdAt),
       FirebaseConstants.fieldUpdatedAt: FieldValue.serverTimestamp(),
       FirebaseConstants.fieldIsActive: true,
@@ -133,7 +130,6 @@ class UserModel extends UserEntity {
     String? phone,
     String? role,
     String? sucursalId,
-    String? address,
     DateTime? createdAt,
     bool? emailVerified,
   }) {
@@ -145,7 +141,6 @@ class UserModel extends UserEntity {
       phone: phone ?? this.phone,
       role: role ?? this.role,
       sucursalId: sucursalId ?? this.sucursalId,
-      address: address ?? this.address,
       createdAt: createdAt ?? this.createdAt,
       emailVerified: emailVerified ?? this.emailVerified,
     );

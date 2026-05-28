@@ -48,14 +48,14 @@ enum OrderStatus {
 /// Tipo de entrega seleccionado por el usuario en checkout.
 enum DeliveryType {
   inStore,
-  delivery;
+  toGo;
 
   String get label {
     switch (this) {
       case DeliveryType.inStore:
-        return 'Recoger en tienda';
-      case DeliveryType.delivery:
-        return 'A domicilio';
+        return 'En sucursal';
+      case DeliveryType.toGo:
+        return 'Para llevar';
     }
   }
 }
@@ -63,7 +63,8 @@ enum DeliveryType {
 /// Método de pago seleccionado por el usuario en checkout.
 enum PaymentMethod {
   cash,
-  card;
+  card,
+  wallet;
 
   String get label {
     switch (this) {
@@ -71,6 +72,8 @@ enum PaymentMethod {
         return 'Efectivo';
       case PaymentMethod.card:
         return 'Tarjeta';
+      case PaymentMethod.wallet:
+        return 'Monedero Caffenio';
     }
   }
 }
@@ -89,7 +92,6 @@ class OrderModel extends Equatable {
   final DateTime createdAt;
   final String? branchId;
   final String? notes;
-  final String? address;
   final DateTime? pickupTime;
   final DateTime? estimatedReadyTime;
   final int pointsEarned;
@@ -108,7 +110,6 @@ class OrderModel extends Equatable {
     required this.createdAt,
     this.branchId,
     this.notes,
-    this.address,
     this.pickupTime,
     this.estimatedReadyTime,
     this.pointsEarned = 0,
@@ -122,12 +123,7 @@ class OrderModel extends Equatable {
     return 'ORD-$year-$seq';
   }
 
-  String get statusLabel {
-    if (status == OrderStatus.delivered) {
-      return deliveryType == DeliveryType.inStore ? 'Recogido' : 'Entregado';
-    }
-    return status.label;
-  }
+  String get statusLabel => status.label;
 
   String get paymentMethodLabel => paymentMethod.label;
 
@@ -168,8 +164,8 @@ class OrderModel extends Equatable {
         json[FirebaseConstants.fieldOrderStatus] as String?,
       ),
       deliveryType: DeliveryType.values.firstWhere(
-        (type) => type.name == json['deliveryType'] || (type == DeliveryType.delivery && json['deliveryType'] == 'toGo'),
-        orElse: () => DeliveryType.delivery,
+        (type) => type.name == json['deliveryType'],
+        orElse: () => DeliveryType.toGo,
       ),
       paymentMethod: PaymentMethod.values.firstWhere(
         (method) =>
@@ -179,7 +175,6 @@ class OrderModel extends Equatable {
       createdAt: createdAt,
       branchId: json[FirebaseConstants.fieldOrderBranchId] as String?,
       notes: json[FirebaseConstants.fieldOrderNotes] as String?,
-      address: json['address'] as String?,
       pickupTime: pickupTime,
       estimatedReadyTime: estimatedReadyTime,
       pointsEarned:
@@ -228,7 +223,6 @@ class OrderModel extends Equatable {
     DateTime? createdAt,
     String? branchId,
     String? notes,
-    String? address,
     DateTime? pickupTime,
     DateTime? estimatedReadyTime,
     int? pointsEarned,
@@ -247,7 +241,6 @@ class OrderModel extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       branchId: branchId ?? this.branchId,
       notes: notes ?? this.notes,
-      address: address ?? this.address,
       pickupTime: pickupTime ?? this.pickupTime,
       estimatedReadyTime: estimatedReadyTime ?? this.estimatedReadyTime,
       pointsEarned: pointsEarned ?? this.pointsEarned,
@@ -268,7 +261,6 @@ class OrderModel extends Equatable {
       'items': items.map((item) => item.toMap()).toList(),
       if (branchId != null) FirebaseConstants.fieldOrderBranchId: branchId,
       if (notes != null) FirebaseConstants.fieldOrderNotes: notes,
-      if (address != null) 'address': address,
       if (pickupTime != null)
         FirebaseConstants.fieldOrderPickupTime: Timestamp.fromDate(pickupTime!),
       if (estimatedReadyTime != null)
@@ -293,7 +285,6 @@ class OrderModel extends Equatable {
         createdAt,
         branchId,
         notes,
-        address,
         pickupTime,
         estimatedReadyTime,
         pointsEarned,

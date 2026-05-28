@@ -110,7 +110,6 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<OrderRemoteDataSource>(
     () => OrderRemoteDataSourceImpl(
       firestore: sl<FirebaseFirestore>(),
-      stockAutomationService: sl<StockAutomationService>(),
     ),
   );
 

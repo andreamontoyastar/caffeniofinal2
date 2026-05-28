@@ -1,33 +1,22 @@
 import 'package:caffenio/core/constants/firebase_constants.dart';
 import 'package:caffenio/core/constants/route_constants.dart';
-import 'package:caffenio/core/services/service_locator.dart';
 import 'package:caffenio/core/theme/app_border_radius.dart';
-import 'package:caffenio/core/theme/app_colors.dart';
 import 'package:caffenio/core/theme/app_spacing.dart';
 import 'package:caffenio/features/admin/presentation/screens/employees_screen.dart';
-import 'package:caffenio/features/admin/presentation/screens/extra_tables_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/inventory_screen.dart';
-import 'package:caffenio/features/admin/presentation/screens/manage_orders_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/promotions_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/purchase_orders_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/sucursales_screen.dart';
 import 'package:caffenio/features/admin/presentation/screens/suppliers_screen.dart';
 import 'package:caffenio/features/auth/presentation/providers/auth_provider.dart';
-import 'package:caffenio/features/notifications/data/notifications_remote_datasource.dart';
-import 'package:caffenio/features/settings/presentation/providers/settings_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class AdminDashboardScreen extends StatefulWidget {
+class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
-  @override
-  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
-}
-
-class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildMetricCard(BuildContext context, String title, String value,
       IconData icon, Color color) {
     final theme = Theme.of(context);
@@ -149,24 +138,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         .doc(orderDoc.id)
         .update({FirebaseConstants.fieldOrderStatus: nextStatus});
 
-    // Enviar notificación al usuario del cambio de estado
-    final String userId = orderDoc.data()[FirebaseConstants.fieldOrderUserId]?.toString() ?? '';
-    if (userId.isNotEmpty && userId != 'Anónimo') {
-      try {
-        final statusLabel = _translateStatus(nextStatus);
-        final orderDisplayId = orderDoc.data()['displayId']?.toString() ?? orderDoc.id;
-        await sl<NotificationsRemoteDataSource>().sendToUser(
-          uid: userId,
-          title: 'Tu pedido cambió de estado',
-          body: 'El pedido $orderDisplayId ahora está: $statusLabel',
-          type: 'order',
-          orderId: orderDoc.id,
-        );
-      } catch (e) {
-        debugPrint('Error sending status notification: $e');
-      }
-    }
-
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -187,41 +158,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         title: Text('Consola Administrativa',
             style: theme.textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: Icon(
-              context.watch<SettingsProvider>().themeMode == ThemeMode.dark
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
-            tooltip: 'Cambiar tema',
-            onPressed: () {
-              final sp = context.read<SettingsProvider>();
-              sp.toggleTheme(sp.themeMode != ThemeMode.dark);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Recargar métricas',
-            onPressed: () {
-              setState(() {});
-            },
-          ),
-        ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {});
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          children: [
-            Text('MÉTRICAS EN TIEMPO REAL',
-                style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurfaceVariant)),
-            const SizedBox(height: AppSpacing.sm),
-            FutureBuilder<Map<String, dynamic>>(
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        children: [
+          Text('MÉTRICAS EN TIEMPO REAL',
+              style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurfaceVariant)),
+          const SizedBox(height: AppSpacing.sm),
+          FutureBuilder<Map<String, dynamic>>(
             future: _calculateDailyMetrics(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -273,6 +219,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             },
           ),
           const SizedBox(height: AppSpacing.sm),
+          _buildMetricCard(context, 'Alertas de Inventario', '2 insumos bajos',
+              Icons.warning, theme.colorScheme.error),
+          const SizedBox(height: AppSpacing.lg),
           Text('ACCIONES DE CONTROL',
               style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -289,19 +238,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.receipt_long, color: AppColors.primary),
-            title: const Text('Gestión de Pedidos (Realtime)', style: TextStyle(fontWeight: FontWeight.bold)),
-            trailing: Icon(Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (ctx) => const ManageOrdersScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
             leading: Icon(Icons.inventory, color: theme.colorScheme.secondary),
             title: Text('Monitoreo de Stock por Ingredientes',
                 style: theme.textTheme.bodyMedium),
@@ -309,7 +245,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurfaceVariant),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
+                MaterialPageRoute(
                   builder: (ctx) => const InventoryScreen(),
                 ),
               );
@@ -324,7 +260,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurfaceVariant),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
+                MaterialPageRoute(
                   builder: (ctx) => const SuppliersScreen(),
                 ),
               );
@@ -338,7 +274,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurfaceVariant),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
+                MaterialPageRoute(
                   builder: (ctx) => const PurchaseOrdersScreen(),
                 ),
               );
@@ -353,7 +289,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurfaceVariant),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
+                MaterialPageRoute(
                   builder: (ctx) => const SucursalesScreen(),
                 ),
               );
@@ -367,7 +303,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurfaceVariant),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
+                MaterialPageRoute(
                   builder: (ctx) => const PromotionsScreen(),
                 ),
               );
@@ -381,7 +317,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurfaceVariant),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
+                MaterialPageRoute(
                   builder: (ctx) => const InventoryScreen(),
                 ),
               );
@@ -395,21 +331,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurfaceVariant),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute<void>(
+                MaterialPageRoute(
                   builder: (ctx) => const EmployeesScreen(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.table_chart, color: Colors.indigo),
-            title: const Text('Administrar Tablas Adicionales', style: TextStyle(fontWeight: FontWeight.bold)),
-            trailing: Icon(Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (ctx) => const ExtraTablesScreen(),
                 ),
               );
             },
@@ -588,7 +511,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 }

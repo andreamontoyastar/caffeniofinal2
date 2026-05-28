@@ -130,7 +130,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: subtotal,
-        deliveryType: DeliveryType.inStore,
+        deliveryType: DeliveryType.toGo,
         paymentMethod: PaymentMethod.card,
       );
 
@@ -140,7 +140,7 @@ void main() {
       expect(order.total, closeTo(70.0 * 1.16, 0.001)); // 81.2
     });
 
-    test('placeOrder should set status to preparing', () {
+    test('placeOrder should set status to pending', () {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
@@ -148,15 +148,15 @@ void main() {
         paymentMethod: PaymentMethod.cash,
       );
 
-      expect(order.status, OrderStatus.preparing);
+      expect(order.status, OrderStatus.pending);
     });
 
     test('lastOrder should return the most recent order', () {
       orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.delivery,
-        paymentMethod: PaymentMethod.card,
+        deliveryType: DeliveryType.toGo,
+        paymentMethod: PaymentMethod.wallet,
       );
 
       expect(orderProvider.lastOrder, isNotNull);
@@ -167,7 +167,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.inStore,
+        deliveryType: DeliveryType.toGo,
         paymentMethod: PaymentMethod.card,
       );
 
@@ -180,7 +180,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.inStore,
+        deliveryType: DeliveryType.toGo,
         paymentMethod: PaymentMethod.card,
       );
 

@@ -49,7 +49,6 @@ abstract final class FirebaseConstants {
   static const String fieldUserPhone = 'phone';
   static const String fieldUserFcmToken = 'fcmToken';
   static const String fieldUserBranchId = 'branchId';
-  static const String fieldUserAddress = 'address';
 
   // ── Campos de producto ────────────────────────────────────────────────────
   static const String fieldProductName = 'name';

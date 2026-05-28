@@ -58,6 +58,7 @@ class AuthProvider extends ChangeNotifier {
   String get displayName => _currentUser?.displayNameOrEmail ?? '';
   String get email => _currentUser?.email ?? '';
   bool get isAdmin => _currentUser?.isAdmin ?? false;
+  bool get isBarista => _currentUser?.isBarista ?? false;
   bool get isCustomer => _currentUser?.isCustomer ?? true;
 
   /// True si la sesión actual no tiene contraseña (solo Google u otro proveedor).
@@ -288,7 +289,6 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> updateProfile({
     String? displayName,
     String? phone,
-    String? address,
   }) async {
     if (_currentUser == null) return false;
     try {
@@ -297,7 +297,6 @@ class AuthProvider extends ChangeNotifier {
         uid: _currentUser!.uid,
         displayName: displayName,
         phone: phone,
-        address: address,
       );
       _currentUser = user;
       _errorMessage = null;

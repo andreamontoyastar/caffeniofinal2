@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'package:caffenio/core/constants/app_constants.dart';
 import 'package:caffenio/core/constants/firebase_constants.dart';
 import 'package:caffenio/core/errors/auth_error_mapper.dart';
 import 'package:caffenio/core/errors/exceptions.dart';
@@ -8,13 +8,14 @@ import 'package:caffenio/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 abstract class AuthRemoteDataSource {
   Stream<UserModel?> get authStateChanges;
   Future<UserModel> signInWithEmailAndPassword(String email, String password);
   Future<UserModel> createUserWithEmailAndPassword(String email, String password, String displayName, String phone);
-  Future<UserModel> updateUserProfile({required String uid, String? displayName, String? phone, String? address});
+  Future<UserModel> updateUserProfile({required String uid, String? displayName, String? phone});
   Future<UserModel> signInWithGoogle();
   Future<UserModel> linkGoogleWithEmailPassword({required String email, required String password});
   Future<void> linkEmailPasswordToCurrentUser({required String email, required String password});
@@ -32,114 +33,47 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   })  : _auth = firebaseAuth,
         _firestore = firestore,
         _notificationsDataSource = notificationsDataSource,
-        _googleSignIn = googleSignIn ??
-            GoogleSignIn(
+        _googleSignIn = googleSignIn ?? GoogleSignIn(
               scopes: ['email', 'profile'],
               serverClientId: DefaultFirebaseOptions.googleWebClientId,
-            ) {
-    _initCombinedStream();
-  }
+            );
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
   final NotificationsRemoteDataSource? _notificationsDataSource;
 
-  final StreamController<UserModel?> _localUserStream = StreamController<UserModel?>.broadcast();
-  UserModel? _cachedUser;
-  late final StreamController<UserModel?> _combinedStreamController;
-
-  void _initCombinedStream() {
-    _combinedStreamController = StreamController<UserModel?>.broadcast();
-    
-    _auth.authStateChanges().listen((firebaseUser) async {
-      if (firebaseUser == null) {
-        _combinedStreamController.add(_cachedUser);
-      } else {
-        try {
-          final user = await _fetchUserFromFirestore(firebaseUser);
-          _cachedUser = user;
-          _combinedStreamController.add(user);
-        } catch (_) {
-          final user = UserModel.fromFirebaseUser(firebaseUser);
-          _cachedUser = user;
-          _combinedStreamController.add(user);
-        }
+  @override
+  Stream<UserModel?> get authStateChanges {
+    return _auth.authStateChanges().asyncMap((firebaseUser) async {
+      if (firebaseUser == null) return null;
+      try {
+        return await _fetchUserFromFirestore(firebaseUser);
+      } catch (_) {
+        return UserModel.fromFirebaseUser(firebaseUser);
       }
-    }, onError: (Object err) {
-      _combinedStreamController.addError(err);
-    });
-
-    _localUserStream.stream.listen((localUser) {
-      _cachedUser = localUser;
-      _combinedStreamController.add(localUser);
-    }, onError: (Object err) {
-      _combinedStreamController.addError(err);
     });
   }
-
-  @override
-  Stream<UserModel?> get authStateChanges => _combinedStreamController.stream;
 
   @override
   Future<UserModel> signInWithEmailAndPassword(String email, String password) async {
     final trimmedEmail = email.trim().toLowerCase();
     try {
+      await _googleSignIn.signOut();
       final credential = await _auth.signInWithEmailAndPassword(
         email: trimmedEmail,
         password: password,
       );
       return await _resolveUserAfterSignIn(credential.user!);
     } on FirebaseAuthException catch (e) {
-      try {
-        final query = await _firestore
-            .collection(FirebaseConstants.usersCollection)
-            .where('email', isEqualTo: trimmedEmail)
-            .get();
-        if (query.docs.isNotEmpty) {
-          final doc = query.docs.first;
-          final storedPassword = doc.data()['password'] as String?;
-          if (storedPassword != null && storedPassword == password) {
-            final userModel = UserModel.fromFirestore(doc);
-            _cachedUser = userModel;
-            _localUserStream.add(userModel);
-            return userModel;
-          }
-        }
-      } catch (err) {
-        debugPrint('Fallback login error: $err');
-      }
       throw await _mapEmailSignInException(e, trimmedEmail);
     } catch (e) {
-      try {
-        final query = await _firestore
-            .collection(FirebaseConstants.usersCollection)
-            .where('email', isEqualTo: trimmedEmail)
-            .get();
-        if (query.docs.isNotEmpty) {
-          final doc = query.docs.first;
-          final storedPassword = doc.data()['password'] as String?;
-          if (storedPassword != null && storedPassword == password) {
-            final userModel = UserModel.fromFirestore(doc);
-            _cachedUser = userModel;
-            _localUserStream.add(userModel);
-            return userModel;
-          }
-        }
-      } catch (err) {
-        debugPrint('Fallback login error: $err');
-      }
       throw const AuthException(message: 'No se pudo completar el inicio de sesión.');
     }
   }
 
   @override
-  Future<UserModel> createUserWithEmailAndPassword(
-    String email,
-    String password,
-    String displayName,
-    String phone,
-  ) async {
+  Future<UserModel> createUserWithEmailAndPassword(String email, String password, String displayName, String phone) async {
     final trimmedEmail = email.trim().toLowerCase();
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -172,15 +106,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateUserProfile({required String uid, String? displayName, String? phone, String? address}) async {
+  Future<UserModel> updateUserProfile({required String uid, String? displayName, String? phone}) async {
     try {
       final userRef = _firestore.collection(FirebaseConstants.usersCollection).doc(uid);
       final Map<String, dynamic> updateData = {};
 
       if (displayName != null) updateData[FirebaseConstants.fieldUserDisplayName] = displayName.trim();
       if (phone != null) updateData[FirebaseConstants.fieldUserPhone] = phone.trim();
-      if (address != null) updateData[FirebaseConstants.fieldUserAddress] = address.trim();
-
+      
       if (updateData.isNotEmpty) {
         updateData[FirebaseConstants.fieldUpdatedAt] = FieldValue.serverTimestamp();
         await userRef.set(updateData, SetOptions(merge: true));
@@ -200,9 +133,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> signInWithGoogle() async {
-    GoogleSignInAccount? googleAccount;
     try {
-      googleAccount = await _googleSignIn.signIn();
+      await _googleSignIn.signOut();
+      final googleAccount = await _googleSignIn.signIn();
       if (googleAccount == null) {
         throw const AuthException(message: 'El inicio de sesión fue cancelado.');
       }
@@ -216,48 +149,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userCredential = await _auth.signInWithCredential(credential);
       return await _resolveUserAfterSignIn(userCredential.user!);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'account-exists-with-different-credential' || e.code == 'credential-already-in-use') {
-        try {
-          final googleEmail = googleAccount?.email ?? '';
-          if (googleEmail.isNotEmpty) {
-            final query = await _firestore
-                .collection(FirebaseConstants.usersCollection)
-                .where('email', isEqualTo: googleEmail.trim().toLowerCase())
-                .get();
-            if (query.docs.isNotEmpty) {
-              final doc = query.docs.first;
-              final userModel = UserModel.fromFirestore(doc);
-              _cachedUser = userModel;
-              _localUserStream.add(userModel);
-              return userModel;
-            }
-          }
-        } catch (err) {
-          debugPrint('Google fallback login error: $err');
-        }
+      if (e.code == 'account-exists-with-different-credential') {
+        throw const AuthException(message: 'Este correo ya está registrado con contraseña. Inicia sesión con correo o usa Vincular.');
       }
       throw AuthErrorMapper.fromFirebaseAuthException(e);
     } catch (e) {
-      try {
-        final googleEmail = googleAccount?.email ?? '';
-        if (googleEmail.isNotEmpty) {
-          final query = await _firestore
-              .collection(FirebaseConstants.usersCollection)
-              .where('email', isEqualTo: googleEmail.trim().toLowerCase())
-              .get();
-          if (query.docs.isNotEmpty) {
-            final doc = query.docs.first;
-            final userModel = UserModel.fromFirestore(doc);
-            _cachedUser = userModel;
-            _localUserStream.add(userModel);
-            return userModel;
-          }
-        }
-      } catch (err) {
-        debugPrint('Google fallback login error: $err');
-      }
-      debugPrint('Error Google Sign-In: $e');
-      throw const AuthException(message: 'Error al iniciar sesión con Google. Verifica tu configuración SHA-1 o usa inicio con correo.');
+      throw const AuthException(message: 'Error al iniciar sesión con Google. Verifica tu configuración SHA-1.');
     }
   }
 
@@ -265,6 +162,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> linkGoogleWithEmailPassword({required String email, required String password}) async {
     final trimmedEmail = email.trim().toLowerCase();
     try {
+      await _googleSignIn.signOut();
       final googleAccount = await _googleSignIn.signIn();
       if (googleAccount == null) throw const AuthException(message: 'Cancelado.');
 
@@ -300,22 +198,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> signOut() async {
-    try {
-      _cachedUser = null;
-      _localUserStream.add(null);
-      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
-    } catch (e) {
-      debugPrint('Error al cerrar sesión: $e');
-    }
+    await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
   }
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
-    try {
-      await _auth.sendPasswordResetEmail(email: email.trim());
-    } on FirebaseAuthException catch (_) {
-      throw const AuthException(message: 'No existe ninguna cuenta con este correo.');
-    }
+    await _auth.sendPasswordResetEmail(email: email.trim());
   }
 
   @override
@@ -325,6 +213,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return await _fetchUserFromFirestore(firebaseUser);
   }
 
+  // Mapeos y validaciones inteligentes de errores
   Future<AuthException> _mapRegisterEmailInUse(String email) async {
     try {
       final methods = await _auth.fetchSignInMethodsForEmail(email);
@@ -349,16 +238,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       } catch (_) {}
       return const AuthException(message: 'Contraseña incorrecta. Verifica tus datos.');
     }
-    if (e.code == 'user-not-found' || e.code == 'invalid-email') {
+    if (e.code == 'user-not-found') {
       return const AuthException(message: 'No existe ninguna cuenta con este correo.');
     }
     return AuthErrorMapper.fromFirebaseAuthException(e);
   }
 
   Future<UserModel> _resolveUserAfterSignIn(User firebaseUser) async {
-    debugPrint('Usuario autenticado: ${firebaseUser.email}');
     final user = await _fetchUserFromFirestore(firebaseUser);
-    await _updateLastLogin(firebaseUser.uid);
     await _safeInitializeLoyalty(firebaseUser.uid);
     return user;
   }
@@ -379,16 +266,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return fallback;
   }
 
-  Future<void> _updateLastLogin(String uid) async {
-    await _firestore.collection(FirebaseConstants.usersCollection).doc(uid).update({
-      'updatedAt': FieldValue.serverTimestamp(),
-    }).catchError((_) => null);
-  }
-
   Future<void> _createUserDocument(UserModel user) async {
     await _firestore.collection(FirebaseConstants.usersCollection).doc(user.uid).set({
       'uid': user.uid,
-      'email': user.email.toLowerCase().trim(),
+      'email': user.email?.toLowerCase().trim(),
       'displayName': user.displayName?.trim() ?? 'Cliente Caffenio',
       'phone': user.phone?.trim() ?? '',
       'role': 'customer',

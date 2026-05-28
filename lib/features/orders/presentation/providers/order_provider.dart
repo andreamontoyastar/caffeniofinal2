@@ -26,14 +26,10 @@ class OrderProvider extends ChangeNotifier {
     required DeliveryType deliveryType,
     required PaymentMethod paymentMethod,
     String? userId,
-    String? branchId,
-    String? address,
   }) {
     const double taxRate = 0.16;
-    final double shippingFee = deliveryType == DeliveryType.delivery ? 30.0 : 0.0;
-    final double actualSubtotal = subtotal + shippingFee;
-    final double tax = actualSubtotal * taxRate;
-    final double total = actualSubtotal + tax;
+    final double tax = subtotal * taxRate;
+    final double total = subtotal + tax;
 
     // ID único basado en timestamp (8 chars hex)
     final String orderId =
@@ -43,15 +39,13 @@ class OrderProvider extends ChangeNotifier {
       id: orderId,
       userId: userId ?? '',
       items: List.from(items),
-      subtotal: actualSubtotal,
+      subtotal: subtotal,
       tax: tax,
       total: total,
-      status: OrderStatus.preparing,
+      status: OrderStatus.pending,
       deliveryType: deliveryType,
       paymentMethod: paymentMethod,
       createdAt: DateTime.now(),
-      branchId: branchId,
-      address: address,
     );
 
     _orders.add(order);

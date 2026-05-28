@@ -171,8 +171,10 @@ abstract final class AppTheme {
       // ── ElevatedButton ─────────────────────────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
+          backgroundColor:
+              isDark ? colorScheme.primary : AppColors.primary,
+          foregroundColor:
+              isDark ? colorScheme.onPrimary : AppColors.onPrimary,
           minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
           elevation: 0,
           shadowColor: Colors.transparent,
@@ -193,8 +195,10 @@ abstract final class AppTheme {
       // ── FilledButton ───────────────────────────────────────────────────
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
+          backgroundColor:
+              isDark ? colorScheme.primary : AppColors.primary,
+          foregroundColor:
+              isDark ? colorScheme.onPrimary : AppColors.onPrimary,
           minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
           shape: const RoundedRectangleBorder(
             borderRadius: AppBorderRadius.button,
@@ -337,12 +341,12 @@ abstract final class AppTheme {
       ),
 
       // ── FloatingActionButton ───────────────────────────────────────────
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         elevation: 4,
         highlightElevation: 8,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: AppBorderRadius.lgAll,
         ),
       ),
@@ -371,13 +375,13 @@ abstract final class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return colorScheme.onPrimary;
+            return AppColors.onPrimary;
           }
           return null;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return colorScheme.primary;
+            return AppColors.primary;
           }
           return null;
         }),

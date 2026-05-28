@@ -48,14 +48,13 @@ class LoyaltyRemoteDataSourceImpl implements LoyaltyRemoteDataSource {
 
     final snapshot = await docRef.get();
     if (!snapshot.exists || snapshot.data() == null) {
-      final initialPoints = pointsEarned.clamp(0, 999999);
       await docRef.set({
         FirebaseConstants.fieldUid: uid,
-        FirebaseConstants.fieldLoyaltyPoints: initialPoints,
-        FirebaseConstants.fieldLoyaltyTotalEarned: initialPoints,
-        FirebaseConstants.fieldLoyaltyTotalRedeemed: pointsEarned < 0 ? pointsEarned.abs() : 0,
+        FirebaseConstants.fieldLoyaltyPoints: pointsEarned,
+        FirebaseConstants.fieldLoyaltyTotalEarned: pointsEarned,
+        FirebaseConstants.fieldLoyaltyTotalRedeemed: 0,
         FirebaseConstants.fieldLoyaltyLevel:
-            LoyaltyCardModel.resolveLevel(initialPoints),
+            LoyaltyCardModel.resolveLevel(pointsEarned),
         FirebaseConstants.fieldCreatedAt: FieldValue.serverTimestamp(),
         FirebaseConstants.fieldUpdatedAt: FieldValue.serverTimestamp(),
       });
@@ -70,22 +69,12 @@ class LoyaltyRemoteDataSourceImpl implements LoyaltyRemoteDataSource {
         (currentData[FirebaseConstants.fieldLoyaltyTotalEarned] as num?)
                 ?.toInt() ??
             0;
-    final currentTotalRedeemed =
-        (currentData[FirebaseConstants.fieldLoyaltyTotalRedeemed] as num?)
-                ?.toInt() ??
-            0;
-
-    final isRedeem = pointsEarned < 0;
-    final pointsDiff = pointsEarned.abs();
-
-    final updatedTotalPoints = (currentPoints + pointsEarned).clamp(0, 999999);
-    final updatedTotalEarned = isRedeem ? currentTotalEarned : (currentTotalEarned + pointsEarned);
-    final updatedTotalRedeemed = isRedeem ? (currentTotalRedeemed + pointsDiff) : currentTotalRedeemed;
+    final updatedTotalPoints = currentPoints + pointsEarned;
+    final updatedTotalEarned = currentTotalEarned + pointsEarned;
 
     await docRef.set({
       FirebaseConstants.fieldLoyaltyPoints: updatedTotalPoints,
       FirebaseConstants.fieldLoyaltyTotalEarned: updatedTotalEarned,
-      FirebaseConstants.fieldLoyaltyTotalRedeemed: updatedTotalRedeemed,
       FirebaseConstants.fieldLoyaltyLevel:
           LoyaltyCardModel.resolveLevel(updatedTotalPoints),
       FirebaseConstants.fieldUpdatedAt: FieldValue.serverTimestamp(),

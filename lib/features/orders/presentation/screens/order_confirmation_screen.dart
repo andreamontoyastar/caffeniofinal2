@@ -71,7 +71,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>
     return PopScope(
       canPop: false, // Evitar que el usuario regrese al checkout
       child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: AppColors.background,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
@@ -213,7 +213,7 @@ class _OrderDetailsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -229,7 +229,7 @@ class _OrderDetailsCard extends StatelessWidget {
           Text(
             'Folio de Pedido',
             style: AppTypography.labelMedium.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: AppColors.onSurfaceVariant,
               letterSpacing: 0.5,
             ),
           ),
@@ -238,7 +238,7 @@ class _OrderDetailsCard extends StatelessWidget {
             order.displayId,
             style: AppTypography.headlineSmall.copyWith(
               fontWeight: FontWeight.w900,
-              color: Theme.of(context).colorScheme.primary,
+              color: AppColors.primary,
               letterSpacing: 2,
             ),
           ),
@@ -279,7 +279,7 @@ class _OrderDetailsCard extends StatelessWidget {
                 icon: Icons.receipt_outlined,
                 label: 'Total pagado',
                 value: '\$${order.total.toStringAsFixed(2)}',
-                valueColor: Theme.of(context).colorScheme.primary,
+                valueColor: AppColors.primary,
               ),
             ],
           ),
@@ -308,18 +308,18 @@ class _DetailItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: AppColors.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            Icon(icon, size: 18, color: AppColors.onSurfaceVariant),
             const Gap(4),
             Text(
               label,
               style: AppTypography.labelSmall.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: AppColors.onSurfaceVariant,
               ),
             ),
             const Gap(2),
@@ -327,7 +327,7 @@ class _DetailItem extends StatelessWidget {
               value,
               style: AppTypography.labelMedium.copyWith(
                 fontWeight: FontWeight.w700,
-                color: valueColor ?? Theme.of(context).colorScheme.onSurface,
+                color: valueColor ?? AppColors.onSurface,
               ),
             ),
           ],

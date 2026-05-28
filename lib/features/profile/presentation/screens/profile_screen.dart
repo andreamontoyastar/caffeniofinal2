@@ -93,13 +93,6 @@ class ProfileScreen extends StatelessWidget {
                   subtitle: Text(user?.phone ?? 'No registrado'),
                 ),
                 const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.location_on_outlined),
-                  title: Text('Dirección de entrega',
-                      style: Theme.of(context).textTheme.bodyMedium),
-                  subtitle: Text(user?.address ?? 'No registrada'),
-                ),
-                const Divider(height: 1),
                 if (authProvider.canAddPassword) ...[
                   ListTile(
                     leading: const Icon(Icons.lock_outline),
@@ -336,8 +329,6 @@ class ProfileScreen extends StatelessWidget {
         TextEditingController(text: (user?.displayName ?? ''));
     final TextEditingController phoneController =
         TextEditingController(text: (user?.phone ?? ''));
-    final TextEditingController addressController =
-        TextEditingController(text: (user?.address ?? ''));
     bool isSubmitting = false;
 
     await showDialog<void>(
@@ -347,55 +338,38 @@ class ProfileScreen extends StatelessWidget {
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('Editar perfil'),
-              content: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: nameController,
-                        decoration: const InputDecoration(labelText: 'Nombre'),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Ingresa tu nombre';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      TextFormField(
-                        controller: phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(labelText: 'Teléfono'),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Ingresa tu teléfono';
-                          }
-                          final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-                          if (digits.length < 10) {
-                            return 'Teléfono no válido';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      TextFormField(
-                        controller: addressController,
-                        decoration: const InputDecoration(
-                          labelText: 'Dirección de entrega',
-                          hintText: 'Calle, Número, Colonia, Ciudad',
-                        ),
-                        maxLines: 2,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Ingresa tu dirección de entrega';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(labelText: 'Nombre'),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Ingresa tu nombre';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextFormField(
+                      controller: phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(labelText: 'Teléfono'),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Ingresa tu teléfono';
+                        }
+                        final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+                        if (digits.length < 10) {
+                          return 'Teléfono no válido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
               ),
               actions: [
@@ -411,22 +385,10 @@ class ProfileScreen extends StatelessWidget {
                           if (!(formKey.currentState?.validate() ?? false)) {
                             return;
                           }
-                          final newName = nameController.text.trim();
-                          final newPhone = phoneController.text.trim();
-                          final newAddress = addressController.text.trim();
-
-                          if (newName == (user?.displayName ?? '') &&
-                              newPhone == (user?.phone ?? '') &&
-                              newAddress == (user?.address ?? '')) {
-                            Navigator.of(context).pop();
-                            return;
-                          }
-
                           setState(() => isSubmitting = true);
                           final success = await authProvider.updateProfile(
-                            displayName: newName,
-                            phone: newPhone,
-                            address: newAddress,
+                            displayName: nameController.text.trim(),
+                            phone: phoneController.text.trim(),
                           );
                           setState(() => isSubmitting = false);
                           if (success) {
