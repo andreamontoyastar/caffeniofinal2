@@ -19,7 +19,7 @@ class _ExtraTablesScreenState extends State<ExtraTablesScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 10, vsync: this);
   }
 
   @override
@@ -44,6 +44,11 @@ class _ExtraTablesScreenState extends State<ExtraTablesScreen> with SingleTicker
             Tab(text: 'Turnos'),
             Tab(text: 'Recetas'),
             Tab(text: 'Pagos'),
+            Tab(text: 'Categorías'),
+            Tab(text: 'Ingredientes'),
+            Tab(text: 'Detalles Pedido'),
+            Tab(text: 'Personalización'),
+            Tab(text: 'Descuentos'),
           ],
         ),
       ),
@@ -55,6 +60,11 @@ class _ExtraTablesScreenState extends State<ExtraTablesScreen> with SingleTicker
           _buildShiftsTab(theme),
           _buildRecipesTab(theme),
           _buildPaymentsTab(theme),
+          _buildCategoriesTab(theme),
+          _buildIngredientsTab(theme),
+          _buildOrderDetailsTab(theme),
+          _buildPersonalizationsTab(theme),
+          _buildDiscountsTab(theme),
         ],
       ),
     );
@@ -273,4 +283,428 @@ class _ExtraTablesScreenState extends State<ExtraTablesScreen> with SingleTicker
       },
     );
   }
+
+  Widget _buildCategoriesTab(ThemeData theme) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ElevatedButton.icon(
+            onPressed: () => _showAddCategoryDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Agregar Categoría'),
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance.collection('categories').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return const Center(child: Text('No hay categorías registradas.'));
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data();
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.category, color: Colors.purple),
+                      title: Text(data['nombre']?.toString() ?? 'Sin Nombre', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Ingrediente Principal: ${data['higreinate'] ?? 'N/A'}\nUnidad: ${data['unidad'] ?? 'N/A'}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => FirebaseFirestore.instance.collection('categories').doc(docs[index].id).delete(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showAddCategoryDialog() async {
+    final nombreCtrl = TextEditingController();
+    final higreinateCtrl = TextEditingController();
+    final unidadCtrl = TextEditingController();
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nueva Categoría'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nombreCtrl, decoration: const InputDecoration(labelText: 'Nombre')),
+              TextField(controller: higreinateCtrl, decoration: const InputDecoration(labelText: 'Ingrediente Principal (higreinate)')),
+              TextField(controller: unidadCtrl, decoration: const InputDecoration(labelText: 'Unidad')),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                if (nombreCtrl.text.isNotEmpty) {
+                  FirebaseFirestore.instance.collection('categories').add({
+                    'nombre': nombreCtrl.text,
+                    'higreinate': higreinateCtrl.text,
+                    'unidad': unidadCtrl.text,
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildIngredientsTab(ThemeData theme) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ElevatedButton.icon(
+            onPressed: () => _showAddIngredientDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Agregar Ingrediente'),
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance.collection('ingredients').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return const Center(child: Text('No hay ingredientes registrados en esta tabla.'));
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data();
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.egg, color: Colors.blueGrey),
+                      title: Text(data['nombre']?.toString() ?? 'Sin Nombre', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Unidad: ${data['unidad'] ?? 'N/A'}\nStock: ${data['stock'] ?? 0.0}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => FirebaseFirestore.instance.collection('ingredients').doc(docs[index].id).delete(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showAddIngredientDialog() async {
+    final nombreCtrl = TextEditingController();
+    final unidadCtrl = TextEditingController();
+    final stockCtrl = TextEditingController(text: '0.0');
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nuevo Ingrediente'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nombreCtrl, decoration: const InputDecoration(labelText: 'Nombre')),
+              TextField(controller: unidadCtrl, decoration: const InputDecoration(labelText: 'Unidad')),
+              TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stock Inicial')),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                if (nombreCtrl.text.isNotEmpty) {
+                  FirebaseFirestore.instance.collection('ingredients').add({
+                    'nombre': nombreCtrl.text,
+                    'unidad': unidadCtrl.text,
+                    'stock': double.tryParse(stockCtrl.text) ?? 0.0,
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildOrderDetailsTab(ThemeData theme) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ElevatedButton.icon(
+            onPressed: () => _showAddOrderDetailDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Agregar Detalle de Pedido'),
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance.collection('orderDetails').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return const Center(child: Text('No hay detalles de pedidos registrados.'));
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data();
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.list_alt, color: Colors.teal),
+                      title: Text('Detalle ID: ${docs[index].id}', style: AppTypography.bodySmall),
+                      subtitle: Text('Pedido ID: ${data['pedido_id'] ?? 'N/A'}\nProducto ID: ${data['producto_id'] ?? 'N/A'}\nCantidad: ${data['cantidad'] ?? 1}\nPrecio Unitario: \$${data['precio_unitario'] ?? 0.0}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => FirebaseFirestore.instance.collection('orderDetails').doc(docs[index].id).delete(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showAddOrderDetailDialog() async {
+    final pedidoCtrl = TextEditingController();
+    final productoCtrl = TextEditingController();
+    final cantidadCtrl = TextEditingController(text: '1');
+    final precioCtrl = TextEditingController(text: '0.0');
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nuevo Detalle de Pedido'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: pedidoCtrl, decoration: const InputDecoration(labelText: 'ID Pedido')),
+              TextField(controller: productoCtrl, decoration: const InputDecoration(labelText: 'ID Producto')),
+              TextField(controller: cantidadCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Cantidad')),
+              TextField(controller: precioCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Precio Unitario')),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                if (pedidoCtrl.text.isNotEmpty && productoCtrl.text.isNotEmpty) {
+                  FirebaseFirestore.instance.collection('orderDetails').add({
+                    'pedido_id': pedidoCtrl.text,
+                    'producto_id': productoCtrl.text,
+                    'cantidad': int.tryParse(cantidadCtrl.text) ?? 1,
+                    'precio_unitario': double.tryParse(precioCtrl.text) ?? 0.0,
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPersonalizationsTab(ThemeData theme) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ElevatedButton.icon(
+            onPressed: () => _showAddPersonalizationDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Agregar Personalización'),
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance.collection('personalizations').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return const Center(child: Text('No hay personalizaciones registradas.'));
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data();
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.tune, color: Colors.indigo),
+                      title: Text('Detalle ID: ${data['detalle_id'] ?? 'N/A'}', style: AppTypography.bodySmall),
+                      subtitle: Text('Opción: ${data['opcion'] ?? 'Sin Opción'}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => FirebaseFirestore.instance.collection('personalizations').doc(docs[index].id).delete(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showAddPersonalizationDialog() async {
+    final detalleCtrl = TextEditingController();
+    final opcionCtrl = TextEditingController();
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nueva Personalización'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: detalleCtrl, decoration: const InputDecoration(labelText: 'ID Detalle Pedido')),
+              TextField(controller: opcionCtrl, decoration: const InputDecoration(labelText: 'Opción (Ej: Leche Soya, Extra Shot)')),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                if (detalleCtrl.text.isNotEmpty && opcionCtrl.text.isNotEmpty) {
+                  FirebaseFirestore.instance.collection('personalizations').add({
+                    'detalle_id': detalleCtrl.text,
+                    'opcion': opcionCtrl.text,
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDiscountsTab(ThemeData theme) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ElevatedButton.icon(
+            onPressed: () => _showAddDiscountDialog(),
+            icon: const Icon(Icons.add),
+            label: const Text('Agregar Descuento'),
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance.collection('discounts').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return const Center(child: Text('No hay descuentos registrados.'));
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data();
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.loyalty, color: Colors.redAccent),
+                      title: Text(data['descripcion']?.toString() ?? 'Sin Descripción', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold)),
+                      subtitle: Text('Descuento: ${data['porcentaje'] ?? 0}%\nValidez: ${data['fecha_inicio'] ?? 'N/A'} a ${data['fecha_fin'] ?? 'N/A'}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => FirebaseFirestore.instance.collection('discounts').doc(docs[index].id).delete(),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showAddDiscountDialog() async {
+    final descCtrl = TextEditingController();
+    final porcCtrl = TextEditingController(text: '10');
+    final inicioCtrl = TextEditingController(text: DateTime.now().toString().substring(0, 10));
+    final finCtrl = TextEditingController(text: DateTime.now().add(const Duration(days: 7)).toString().substring(0, 10));
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nuevo Descuento'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Descripción')),
+              TextField(controller: porcCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Porcentaje')),
+              TextField(controller: inicioCtrl, decoration: const InputDecoration(labelText: 'Fecha Inicio (AAAA-MM-DD)')),
+              TextField(controller: finCtrl, decoration: const InputDecoration(labelText: 'Fecha Fin (AAAA-MM-DD)')),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(
+              onPressed: () {
+                if (descCtrl.text.isNotEmpty) {
+                  FirebaseFirestore.instance.collection('discounts').add({
+                    'descripcion': descCtrl.text,
+                    'porcentaje': int.tryParse(porcCtrl.text) ?? 10,
+                    'fecha_inicio': inicioCtrl.text,
+                    'fecha_fin': finCtrl.text,
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
+
