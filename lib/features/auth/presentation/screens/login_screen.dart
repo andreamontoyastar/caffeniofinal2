@@ -1,5 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:caffenio/core/constants/route_constants.dart';
+import 'package:caffenio/core/services/service_locator.dart';
 import 'package:caffenio/core/theme/app_border_radius.dart';
 import 'package:caffenio/core/theme/app_colors.dart';
 import 'package:caffenio/core/theme/app_spacing.dart';
@@ -8,6 +9,7 @@ import 'package:caffenio/features/auth/presentation/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
 /// Pantalla de inicio de sesión.
@@ -54,9 +56,154 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     final auth = context.read<AuthProvider>();
     final success = await auth.signInWithGoogle();
-    if (!success && mounted && auth.errorMessage != null) {
-      _showErrorSnackBar(auth.errorMessage!);
+    if (!success && mounted) {
+      if (auth.errorCode == 'account-exists-with-different-credential') {
+        await _showLinkAccountDialog();
+      } else if (auth.errorMessage != null) {
+        _showErrorSnackBar(auth.errorMessage!);
+      }
     }
+  }
+
+  Future<void> _showLinkAccountDialog() async {
+    final auth = context.read<AuthProvider>();
+    final String googleEmail = sl<GoogleSignIn>().currentUser?.email ?? '';
+
+    final formKey = GlobalKey<FormState>();
+    final emailController = TextEditingController(text: googleEmail);
+    final passwordController = TextEditingController();
+    bool obscure = true;
+    bool isSubmitting = false;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: const RoundedRectangleBorder(
+                borderRadius: AppBorderRadius.lgAll,
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.link, color: AppColors.primary),
+                  Gap(8),
+                  Text('Vincular Cuentas'),
+                ],
+              ),
+              content: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'El correo de tu cuenta de Google ya está registrado con contraseña. Introduce tu contraseña para vincularlas y poder entrar con ambas.',
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                      const Gap(16),
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Correo electrónico',
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Ingresa tu correo';
+                          }
+                          return null;
+                        },
+                      ),
+                      const Gap(12),
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: obscure,
+                        decoration: InputDecoration(
+                          labelText: 'Contraseña de la cuenta',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscure
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () =>
+                                setState(() => obscure = !obscure),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Ingresa la contraseña';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (!(formKey.currentState?.validate() ?? false)) {
+                            return;
+                          }
+                          setState(() => isSubmitting = true);
+                          final success = await auth.linkGoogleWithEmailPassword(
+                            email: emailController.text.trim(),
+                            password: passwordController.text,
+                          );
+                          setState(() => isSubmitting = false);
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Cuentas vinculadas con éxito.'),
+                                backgroundColor: AppColors.primary,
+                              ),
+                            );
+                          } else if (auth.errorMessage != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(auth.errorMessage!),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          }
+                        },
+                  child: isSubmitting
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text('Vincular'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    emailController.dispose();
+    passwordController.dispose();
   }
 
   void _showErrorSnackBar(String message) {
@@ -127,18 +274,19 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 85,
+              height: 85,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white.withValues(alpha: 0.35),
                   width: 2,
                 ),
-              ),
-              child: const Center(
-                child: Text('☕', style: TextStyle(fontSize: 38)),
+                image: const DecorationImage(
+                  image: NetworkImage('https://raw.githubusercontent.com/montoya06470/Imagenes-para-flutter-6to-I-fecha-11-feb-2026/refs/heads/main/logo.jpeg'),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const Gap(16),
@@ -169,8 +317,8 @@ class _LoginScreenState extends State<LoginScreen> {
       duration: const Duration(milliseconds: 600),
       child: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: AppBorderRadius.topXl,
         ),
         child: SingleChildScrollView(
@@ -225,89 +373,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 _buildGoogleButton(),
                 const Gap(AppSpacing.sm),
                 _buildRegisterButton(),
-                const Gap(AppSpacing.xl),
-                _buildDemoSection(),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDemoSection() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withAlpha(13),
-        borderRadius: AppBorderRadius.mdAll,
-        border: Border.all(
-          color: AppColors.primary.withAlpha(38),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.flash_on, color: AppColors.primary, size: 18),
-              const Gap(6),
-              Text(
-                'Acceso Rápido (Modo Demo)',
-                style: AppTypography.titleMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const Gap(4),
-          Text(
-            'Entra al instante omitiendo Firebase Auth para probar los distintos roles:',
-            textAlign: TextAlign.center,
-            style: AppTypography.labelSmall.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'customer'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: const Text('Cliente', style: TextStyle(color: Colors.white, fontSize: 12)),
-                ),
-              ),
-              const Gap(8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'barista'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueGrey,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: const Text('Barista', style: TextStyle(color: Colors.white, fontSize: 12)),
-                ),
-              ),
-              const Gap(8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'admin'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: const Text('Admin', style: TextStyle(color: Colors.white, fontSize: 12)),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -376,17 +445,16 @@ class _LoginScreenState extends State<LoginScreen> {
         return ElevatedButton(
           onPressed: auth.isActionLoading ? null : _signIn,
           child: auth.isActionLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 22,
                   height: 22,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     strokeWidth: 2.5,
                   ),
                 )
-              : Text(
+              : const Text(
                   'Iniciar sesión',
-                  style: AppTypography.button.copyWith(color: Colors.white),
                 ),
         );
       },
@@ -417,8 +485,8 @@ class _LoginScreenState extends State<LoginScreen> {
         return OutlinedButton(
           onPressed: auth.isActionLoading ? null : _signInWithGoogle,
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.onBackground,
-            side: const BorderSide(color: AppColors.outline),
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+            side: BorderSide(color: Theme.of(context).colorScheme.outline),
             minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
             shape: const RoundedRectangleBorder(
               borderRadius: AppBorderRadius.button,
@@ -449,7 +517,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 'Continuar con Google',
                 style: AppTypography.button.copyWith(
-                  color: AppColors.onBackground,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],

@@ -54,6 +54,7 @@ abstract class AuthRepository {
     required String uid,
     String? displayName,
     String? phone,
+    String? address,
   });
 
   /// Cierra la sesión actual (Firebase + Google).

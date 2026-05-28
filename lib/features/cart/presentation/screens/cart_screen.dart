@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 ///
 /// Muestra los items agregados con sus personalizaciones, subtotales,
 /// IVA estimado y total final. Permite ajustar cantidades, eliminar
-/// productos individuales o proceder al checkout.
+/// productos individuales o proceder al checkout de los artículos seleccionados.
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
@@ -152,11 +152,33 @@ class _CartContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double tax = cart.subtotal * taxRate;
-    final double total = cart.subtotal + tax;
+    final double tax = cart.selectedSubtotal * taxRate;
+    final double total = cart.selectedSubtotal + tax;
+    final bool allSelected = cart.items.isNotEmpty && cart.selectedItemIds.length == cart.items.length;
 
     return Column(
       children: [
+        // Fila para "Seleccionar todo"
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+          color: Theme.of(context).cardColor,
+          child: Row(
+            children: [
+              Checkbox(
+                value: allSelected,
+                activeColor: AppColors.primary,
+                onChanged: (val) {
+                  cart.selectAll(val ?? false);
+                },
+              ),
+              Text(
+                'Seleccionar todos (${cart.items.length})',
+                style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
         // Lista de items
         Expanded(
           child: ListView.separated(
@@ -174,7 +196,12 @@ class _CartContent extends StatelessWidget {
         ),
 
         // Panel de totales + CTA
-        _TotalPanel(subtotal: cart.subtotal, tax: tax, total: total),
+        _TotalPanel(
+          subtotal: cart.selectedSubtotal,
+          tax: tax,
+          total: total,
+          hasSelection: cart.selectedItemIds.isNotEmpty,
+        ),
       ],
     );
   }
@@ -193,29 +220,39 @@ class _CartItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unitPrice = item.subtotal / item.quantity;
+    final isSelected = cart.isSelected(item.id);
 
     return Card(
-      elevation: 0,
+      elevation: isSelected ? 2 : 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.outlineVariant),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : AppColors.outlineVariant,
+          width: isSelected ? 1.5 : 1,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Checkbox(
+              value: isSelected,
+              activeColor: AppColors.primary,
+              onChanged: (_) {
+                cart.toggleSelection(item.id);
+              },
+            ),
             // Ícono del producto
             Container(
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
+                color: isSelected ? AppColors.primaryContainer : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.coffee,
-                color: AppColors.primary,
+                color: isSelected ? AppColors.primary : Colors.grey.shade600,
                 size: 28,
               ),
             ),
@@ -226,11 +263,22 @@ class _CartItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.product.name,
-                    style: AppTypography.titleSmall.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.product.name,
+                          style: AppTypography.titleSmall.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 20, color: AppColors.error),
+                        onPressed: () => cart.removeItem(item.id),
+                      ),
+                    ],
                   ),
                   const Gap(AppSpacing.xs),
                   _CustomizationChips(item: item),
@@ -245,13 +293,23 @@ class _CartItemCard extends StatelessWidget {
                           color: AppColors.onSurfaceVariant,
                         ),
                       ),
-                      // Subtotal del item
-                      Text(
-                        '\$${item.subtotal.toStringAsFixed(2)}',
-                        style: AppTypography.titleSmall.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      // Cantidades y Subtotal
+                      Row(
+                        children: [
+                          Text(
+                            'Cant: ${item.quantity}  ·  ',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.onSurfaceVariant,
+                            ),
+                          ),
+                          Text(
+                            '\$${item.subtotal.toStringAsFixed(2)}',
+                            style: AppTypography.titleSmall.copyWith(
+                              color: isSelected ? AppColors.primary : Colors.grey.shade800,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -313,11 +371,13 @@ class _TotalPanel extends StatelessWidget {
     required this.subtotal,
     required this.tax,
     required this.total,
+    required this.hasSelection,
   });
 
   final double subtotal;
   final double tax;
   final double total;
+  final bool hasSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -352,10 +412,10 @@ class _TotalPanel extends StatelessWidget {
             ),
           ),
 
-          _PriceRow(label: 'Subtotal', value: subtotal),
+          _PriceRow(label: 'Subtotal seleccionado', value: subtotal),
           const Gap(AppSpacing.xs),
           _PriceRow(
-            label: 'IVA (16%)',
+            label: 'IVA estimado (16%)',
             value: tax,
             valueColor: AppColors.onSurfaceVariant,
           ),
@@ -364,7 +424,7 @@ class _TotalPanel extends StatelessWidget {
             child: Divider(),
           ),
           _PriceRow(
-            label: 'Total',
+            label: 'Total a pagar',
             value: total,
             isTotal: true,
           ),
@@ -373,9 +433,9 @@ class _TotalPanel extends StatelessWidget {
 
           // Botón Checkout
           ElevatedButton.icon(
-            onPressed: () => context.push('/cart/checkout'),
+            onPressed: hasSelection ? () => context.push('/cart/checkout') : null,
             icon: const Icon(Icons.payment_outlined),
-            label: const Text('Proceder al Pago'),
+            label: Text(hasSelection ? 'Proceder al Pago' : 'Selecciona artículos'),
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
             ),

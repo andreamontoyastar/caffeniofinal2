@@ -44,11 +44,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required String uid,
     String? displayName,
     String? phone,
+    String? address,
   }) {
     return _remoteDataSource.updateUserProfile(
       uid: uid,
       displayName: displayName,
       phone: phone,
+      address: address,
     );
   }
 

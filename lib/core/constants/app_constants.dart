@@ -9,7 +9,6 @@ abstract final class AppConstants {
 
   // ── Roles de usuario ──────────────────────────────────────────────────────
   static const String roleCustomer = 'customer';
-  static const String roleBarista = 'barista';
   static const String roleAdmin = 'admin';
 
   // ── Paginación ────────────────────────────────────────────────────────────

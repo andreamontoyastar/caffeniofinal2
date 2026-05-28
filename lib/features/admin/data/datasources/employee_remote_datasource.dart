@@ -25,7 +25,7 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   @override
   Stream<List<EmployeeModel>> watchAllEmployees() {
     return _usersRef
-        .where('role', whereIn: ['barista', 'admin'])
+        .orderBy('displayName')
         .snapshots()
         .map((snapshot) {
           return snapshot.docs
@@ -38,7 +38,6 @@ class EmployeeRemoteDataSourceImpl implements EmployeeRemoteDataSource {
   Stream<List<EmployeeModel>> watchBySucursal(String sucursalId) {
     return _usersRef
         .where('sucursalId', isEqualTo: sucursalId)
-        .where('role', whereIn: ['barista', 'admin'])
         .snapshots()
         .map((snapshot) {
           return snapshot.docs

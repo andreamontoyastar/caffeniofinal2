@@ -130,7 +130,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: subtotal,
-        deliveryType: DeliveryType.toGo,
+        deliveryType: DeliveryType.inStore,
         paymentMethod: PaymentMethod.card,
       );
 
@@ -155,8 +155,8 @@ void main() {
       orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.toGo,
-        paymentMethod: PaymentMethod.wallet,
+        deliveryType: DeliveryType.delivery,
+        paymentMethod: PaymentMethod.card,
       );
 
       expect(orderProvider.lastOrder, isNotNull);
@@ -167,7 +167,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.toGo,
+        deliveryType: DeliveryType.inStore,
         paymentMethod: PaymentMethod.card,
       );
 
@@ -180,7 +180,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.toGo,
+        deliveryType: DeliveryType.inStore,
         paymentMethod: PaymentMethod.card,
       );
 

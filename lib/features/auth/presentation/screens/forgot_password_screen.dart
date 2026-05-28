@@ -69,7 +69,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Recuperar contraseña'),
         leading: IconButton(
@@ -160,19 +160,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 return ElevatedButton(
                   onPressed: auth.isActionLoading ? null : _sendReset,
                   child: auth.isActionLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                             strokeWidth: 2.5,
                           ),
                         )
-                      : Text(
+                      : const Text(
                           'Enviar instrucciones',
-                          style: AppTypography.button.copyWith(
-                            color: Colors.white,
-                          ),
                         ),
                 );
               },
@@ -268,9 +265,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
             ElevatedButton(
               onPressed: () => context.pop(),
-              child: Text(
+              child: const Text(
                 'Volver al inicio de sesión',
-                style: AppTypography.button.copyWith(color: Colors.white),
               ),
             ),
             const Gap(AppSpacing.md),

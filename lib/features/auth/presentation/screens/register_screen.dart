@@ -166,8 +166,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       duration: const Duration(milliseconds: 550),
       child: Container(
         margin: const EdgeInsets.only(top: AppSpacing.lg),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: AppBorderRadius.topXl,
         ),
         child: SingleChildScrollView(
@@ -418,17 +418,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return ElevatedButton(
           onPressed: auth.isActionLoading ? null : _register,
           child: auth.isActionLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 22,
                   height: 22,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     strokeWidth: 2.5,
                   ),
                 )
-              : Text(
+              : const Text(
                   'Crear cuenta',
-                  style: AppTypography.button.copyWith(color: Colors.white),
                 ),
         );
       },

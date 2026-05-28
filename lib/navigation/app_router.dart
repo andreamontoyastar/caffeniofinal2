@@ -82,15 +82,7 @@ class MainShellScaffold extends StatelessWidget {
   }
 }
 
-// Stubs ligeros remanentes
-class BaristaOrdersScreen extends StatelessWidget {
-  const BaristaOrdersScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-        body: Center(child: Text('Consola del Barista')),
-      );
-}
+// App Router setup
 
 class AppRouter {
   final AuthProvider authProvider;
@@ -120,24 +112,17 @@ class AppRouter {
           // Evita "No route found" para la raíz y ruta home redirigiendo a la pantalla inicial correspondiente
           if (state.matchedLocation == '/' ||
               state.matchedLocation == '/home') {
-            if (userRole == 'barista') return '/barista/orders';
             if (userRole == 'admin') return '/admin/dashboard';
             return '/home/catalog';
           }
 
           if (authStatus == AuthStatus.authenticated &&
               (isGoingToSplash || isGoingToAuth)) {
-            if (userRole == 'barista') return '/barista/orders';
             if (userRole == 'admin') return '/admin/dashboard';
             return '/home/catalog';
           }
 
           if (state.matchedLocation.startsWith('/admin') && userRole != 'admin') {
-            return '/home/catalog';
-          }
-          if (state.matchedLocation.startsWith('/barista') &&
-              userRole != 'barista' &&
-              userRole != 'admin') {
             return '/home/catalog';
           }
 
@@ -204,9 +189,6 @@ class AppRouter {
           ),
 
           // CONTROLES DE EMPLEADOS VIA RUTA DIRECTA
-          GoRoute(
-              path: '/barista/orders',
-              builder: (context, state) => const BaristaOrdersScreen()),
           GoRoute(
               path: RouteConstants.adminDashboard,
               builder: (context, state) => const AdminDashboardScreen()),

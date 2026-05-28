@@ -100,7 +100,7 @@ class CatalogScreen extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .onPrimary
-                        .withOpacity(0.92),
+                        .withValues(alpha: 0.92),
                   ),
                 ),
               ],

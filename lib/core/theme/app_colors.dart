@@ -76,11 +76,11 @@ abstract final class AppColors {
   // ─────────────────────────────────────────────────────────────────────────
 
   /// Colores específicos para tema oscuro
-  static const _DarkColors dark = _DarkColors();
+  static const DarkColors dark = DarkColors();
 }
 
-final class _DarkColors {
-  const _DarkColors();
+final class DarkColors {
+  const DarkColors();
 
   // ── Primarios dark (contraste legible) ────────────────────────────────────
   Color get primary => const Color(0xFFFF8A80);

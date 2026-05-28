@@ -16,6 +16,7 @@ class UserEntity extends Equatable {
     this.photoURL,
     this.phone,
     this.sucursalId,
+    this.address,
   });
 
   /// ID único de Firebase Auth.
@@ -31,14 +32,17 @@ class UserEntity extends Equatable {
   final String? photoURL;
 
   /// Rol del usuario en la aplicación.
-  /// Valores posibles: 'customer', 'barista', 'admin'.
+  /// Valores posibles: 'customer', 'admin'.
   final String role;
 
   /// Número de teléfono del usuario.
   final String? phone;
 
-  /// ID de la sucursal asignada (solo para baristas).
+  /// ID de la sucursal asignada (si aplica).
   final String? sucursalId;
+
+  /// Dirección del usuario.
+  final String? address;
 
   /// Fecha de creación de la cuenta.
   final DateTime createdAt;
@@ -49,7 +53,6 @@ class UserEntity extends Equatable {
   // ── Helpers de rol ────────────────────────────────────────────────────────
 
   bool get isAdmin => role == AppConstants.roleAdmin;
-  bool get isBarista => role == AppConstants.roleBarista;
   bool get isCustomer => role == AppConstants.roleCustomer;
 
   /// Nombre para mostrar en la UI.
@@ -78,6 +81,7 @@ class UserEntity extends Equatable {
     String? phone,
     String? role,
     String? sucursalId,
+    String? address,
     DateTime? createdAt,
     bool? emailVerified,
   }) {
@@ -89,6 +93,7 @@ class UserEntity extends Equatable {
       phone: phone ?? this.phone,
       role: role ?? this.role,
       sucursalId: sucursalId ?? this.sucursalId,
+      address: address ?? this.address,
       createdAt: createdAt ?? this.createdAt,
       emailVerified: emailVerified ?? this.emailVerified,
     );
@@ -103,6 +108,7 @@ class UserEntity extends Equatable {
         phone,
         role,
         sucursalId,
+        address,
         createdAt,
         emailVerified,
       ];
