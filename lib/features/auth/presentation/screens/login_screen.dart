@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white.withValues(alpha: 0.35),
@@ -227,6 +227,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 _buildRegisterButton(),
                 const Gap(AppSpacing.xl),
                 _buildDemoSection(),
+                const Gap(AppSpacing.lg),
+                Center(
+                  child: Text(
+                    'Desarrollado por Andrea Montoya 6I',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -239,10 +249,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.primary.withAlpha(13),
+        color: AppColors.primary.withValues(alpha: 0.05),
         borderRadius: AppBorderRadius.mdAll,
         border: Border.all(
-          color: AppColors.primary.withAlpha(38),
+          color: AppColors.primary.withValues(alpha: 0.15),
         ),
       ),
       child: Column(

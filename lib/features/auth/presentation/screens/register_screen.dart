@@ -289,6 +289,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Link a login
                 _buildLoginLink(),
                 const Gap(AppSpacing.md),
+                Center(
+                  child: Text(
+                    'Desarrollado por Andrea Montoya 6I',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
