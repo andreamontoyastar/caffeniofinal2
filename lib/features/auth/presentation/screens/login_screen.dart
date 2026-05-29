@@ -226,8 +226,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Gap(AppSpacing.sm),
                 _buildRegisterButton(),
                 const Gap(AppSpacing.xl),
-                _buildDemoSection(),
-                const Gap(AppSpacing.lg),
                 Center(
                   child: Text(
                     'Desarrollado por Andrea Montoya 6I',
@@ -241,83 +239,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDemoSection() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.05),
-        borderRadius: AppBorderRadius.mdAll,
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.15),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.flash_on, color: AppColors.primary, size: 18),
-              const Gap(6),
-              Text(
-                'Acceso Rápido (Modo Demo)',
-                style: AppTypography.titleMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const Gap(4),
-          Text(
-            'Entra al instante omitiendo Firebase Auth para probar los distintos roles:',
-            textAlign: TextAlign.center,
-            style: AppTypography.labelSmall.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'customer'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: const Text('Cliente', style: TextStyle(color: Colors.white, fontSize: 12)),
-                ),
-              ),
-              const Gap(8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'barista'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueGrey,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: const Text('Barista', style: TextStyle(color: Colors.white, fontSize: 12)),
-                ),
-              ),
-              const Gap(8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.read<AuthProvider>().signInDemo(role: 'admin'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: const Text('Admin', style: TextStyle(color: Colors.white, fontSize: 12)),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
