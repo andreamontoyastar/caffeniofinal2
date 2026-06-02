@@ -127,18 +127,27 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 90,
+              height: 90,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.35),
-                  width: 2,
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.20),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: const Center(
-                child: Text('☕', style: TextStyle(fontSize: 38)),
+              child: ClipOval(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Image.asset(
+                    'assets/icons/app_logo.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
             const Gap(16),

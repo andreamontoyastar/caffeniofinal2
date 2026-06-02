@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Proyecto Caffenio</title>
+    <style>
+        /* Configuración de la página */
+        @page {
+            size: auto;
+            margin: 0; /* Elimina encabezados y pies de página del navegador */
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        /* Contenedor para cada hoja */
+        .page {
+            page-break-after: always;
+            break-after: page;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+        /* Evita una página en blanco al final */
+        .page:last-child {
+            page-break-after: avoid;
+            break-after: avoid;
+        }
+        /* Ajuste óptimo de las imágenes */
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        <img src="https://github.com/user-attachments/assets/83e5083b-333e-4e66-95cd-545194f3695a" alt="Etapa 0">
+    </div>
+
+    <div class="page">
+        <img src="https://github.com/user-attachments/assets/02aff897-0f6d-4e71-ae33-734da72a38e2" alt="Fase 1 y 2">
+    </div>
+
+    <div class="page">
+        <img src="https://github.com/user-attachments/assets/b2ba9707-7ab5-462f-a1cf-4eafbb9c74ed" alt="Fase 3 y 4">
+    </div>
+
+    <div class="page">
+        <img src="https://github.com/user-attachments/assets/b5438bea-a584-42b4-b958-ee279f061bc0" alt="Fase 5 y 6">
+    </div>
+
+    <div class="page">
+        <img src="https://github.com/user-attachments/assets/7b4934dc-0681-4844-9ef8-41648586612e" alt="Fase 7 y 8">
+    </div>
+
+    <div class="page">
+        <img src="https://github.com/user-attachments/assets/9a7edd65-5e87-4358-b2c9-77802dce4e33" alt="Fase 9, 10 y 11">
+    </div>
+
+    <div class="page">
+        <img src="https://github.com/user-attachments/assets/8b03b1ea-0e9a-4f2a-b321-8a10a2ddfccd" alt="Fase 12 y extras">
+    </div>
+
+</body>
+</html>
