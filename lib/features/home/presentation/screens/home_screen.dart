@@ -20,9 +20,10 @@ class HomeScreen extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final user = auth.currentUser;
     final cartCount = context.watch<CartProvider>().itemCount;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Caffenio'),
         actions: [
@@ -78,11 +79,11 @@ class HomeScreen extends StatelessWidget {
               // Avatar
               CircleAvatar(
                 radius: 48,
-                backgroundColor: AppColors.primaryContainer,
+                backgroundColor: colorScheme.primaryContainer,
                 child: Text(
                   user?.initials ?? '?',
                   style: AppTypography.headlineMedium.copyWith(
-                    color: AppColors.primary,
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -110,13 +111,13 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: AppSpacing.chipPadding,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(AppSpacing.sm),
                 ),
                 child: Text(
                   user?.role.toUpperCase() ?? '',
                   style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.primaryDark,
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.0,
                   ),

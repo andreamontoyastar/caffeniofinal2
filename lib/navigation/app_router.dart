@@ -186,12 +186,13 @@ class AppRouter {
               GoRoute(
                   path: '/home/profile',
                   builder: (context, state) => const ProfileScreen()),
+              GoRoute(
+                  path: '/cart',
+                  builder: (context, state) => const CartScreen()),
             ],
           ),
 
           // FLUJO DE COMPRA INDEPENDIENTE FUERA DEL SHELL
-          GoRoute(
-              path: '/cart', builder: (context, state) => const CartScreen()),
           GoRoute(
               path: '/cart/checkout',
               builder: (context, state) => const CheckoutScreen()),

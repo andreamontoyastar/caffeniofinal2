@@ -1,3 +1,4 @@
+import 'package:caffenio/core/services/notification_local_service.dart';
 import 'package:caffenio/core/services/service_locator.dart';
 import 'package:caffenio/core/theme/app_theme.dart';
 import 'package:caffenio/features/auth/domain/repositories/auth_repository.dart';
@@ -78,6 +79,9 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     // Inicializar el router central inyectando el AuthProvider para reactividad
     _appRouter = AppRouter(authProvider: context.read<AuthProvider>());
+    
+    // Solicitar permisos de notificación al iniciar la aplicación
+    NotificationLocalService.instance.initialize();
   }
 
   @override

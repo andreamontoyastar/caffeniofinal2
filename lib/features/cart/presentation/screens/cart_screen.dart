@@ -23,7 +23,6 @@ class CartScreen extends StatelessWidget {
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Mi Carrito'),
         actions: [
@@ -113,6 +112,7 @@ class _EmptyCartView extends StatelessWidget {
               'Tu carrito está vacío',
               style: AppTypography.headlineSmall.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -120,7 +120,7 @@ class _EmptyCartView extends StatelessWidget {
             Text(
               'Explora nuestro menú y agrega\ntus bebidas favoritas.',
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -230,6 +230,7 @@ class _CartItemCard extends StatelessWidget {
                     item.product.name,
                     style: AppTypography.titleSmall.copyWith(
                       fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const Gap(AppSpacing.xs),
@@ -242,14 +243,14 @@ class _CartItemCard extends StatelessWidget {
                       Text(
                         '\$${unitPrice.toStringAsFixed(2)} c/u',
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       // Subtotal del item
                       Text(
                         '\$${item.subtotal.toStringAsFixed(2)}',
                         style: AppTypography.titleSmall.copyWith(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -282,6 +283,8 @@ class _CustomizationChips extends StatelessWidget {
       ...item.selectedExtras.map((e) => e.name),
     ];
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Wrap(
       spacing: 4,
       runSpacing: 4,
@@ -289,13 +292,13 @@ class _CustomizationChips extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: AppColors.secondaryContainer,
+            color: colorScheme.secondaryContainer,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             label,
             style: AppTypography.labelSmall.copyWith(
-              color: AppColors.secondaryDark,
+              color: colorScheme.onSecondaryContainer,
             ),
           ),
         );
@@ -321,6 +324,7 @@ class _TotalPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -329,10 +333,10 @@ class _TotalPanel extends StatelessWidget {
         AppSpacing.xl,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.08),
+            color: colorScheme.shadow.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -347,7 +351,7 @@ class _TotalPanel extends StatelessWidget {
             height: 4,
             margin: const EdgeInsets.only(bottom: AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.outlineVariant,
+              color: colorScheme.outlineVariant,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -357,7 +361,7 @@ class _TotalPanel extends StatelessWidget {
           _PriceRow(
             label: 'IVA (16%)',
             value: tax,
-            valueColor: AppColors.onSurfaceVariant,
+            valueColor: colorScheme.onSurfaceVariant,
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
@@ -401,9 +405,15 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final TextStyle style = isTotal
-        ? AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w800)
-        : AppTypography.bodyMedium;
+        ? AppTypography.titleMedium.copyWith(
+            fontWeight: FontWeight.w800,
+            color: colorScheme.onSurface,
+          )
+        : AppTypography.bodyMedium.copyWith(
+            color: colorScheme.onSurface,
+          );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -412,13 +422,13 @@ class _PriceRow extends StatelessWidget {
           label,
           style: isTotal
               ? style
-              : style.copyWith(color: AppColors.onSurfaceVariant),
+              : style.copyWith(color: colorScheme.onSurfaceVariant),
         ),
         Text(
           '\$${value.toStringAsFixed(2)}',
           style: style.copyWith(
             color: valueColor ??
-                (isTotal ? AppColors.primary : AppColors.onSurface),
+                (isTotal ? colorScheme.primary : colorScheme.onSurface),
           ),
         ),
       ],

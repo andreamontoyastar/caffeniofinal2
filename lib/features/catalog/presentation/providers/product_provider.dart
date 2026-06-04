@@ -27,7 +27,11 @@ class ProductProvider extends ChangeNotifier {
   void _listenToProducts() {
     _subscription = _repository.watchProducts().listen(
       (products) {
-        _products = products;
+        _products = products
+            .where((p) =>
+                p.imageUrl != null &&
+                p.imageUrl!.contains('githubusercontent.com'))
+            .toList();
         _errorMessage = null;
         _isLoading = false;
         notifyListeners();

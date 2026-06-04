@@ -69,7 +69,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Recuperar contraseña'),
         leading: IconButton(
@@ -103,8 +102,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: Container(
                 width: 100,
                 height: 100,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryContainer,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
                 child: const Center(
@@ -213,8 +212,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: Container(
                 width: 110,
                 height: 110,
-                decoration: const BoxDecoration(
-                  color: AppColors.successContainer,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.dark.successContainer
+                      : AppColors.successContainer,
                   shape: BoxShape.circle,
                 ),
                 child: const Center(
@@ -227,7 +228,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Text(
               '¡Correo enviado!',
               style: AppTypography.headlineSmall.copyWith(
-                color: AppColors.success,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.dark.success
+                    : AppColors.success,
               ),
               textAlign: TextAlign.center,
             ),

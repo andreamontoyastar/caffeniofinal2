@@ -64,60 +64,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         height: 220,
                         width: double.infinity,
                         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: widget.product.imageUrl != null &&
-                                widget.product.imageUrl!.isNotEmpty
-                            ? Image.network(
-                                widget.product.imageUrl!,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return const Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  // Fall back to product.displayImageUrl (Unsplash) when the original fails
-                                  return Image.network(
-                                    widget.product.displayImageUrl,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    loadingBuilder:
-                                        (context, child, loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return const Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                        ),
-                                      );
-                                    },
-                                    errorBuilder:
-                                        (context, error2, stackTrace2) {
-                                      return Container(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainerHighest,
-                                        child: Center(
-                                          child: Icon(Icons.coffee,
-                                              size: 100,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              )
-                            : Center(
+                        child: Image.network(
+                          widget.product.displayImageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                              child: Center(
                                 child: Icon(Icons.coffee,
                                     size: 100,
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary),
                               ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -134,9 +107,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // 1. Selector de Tamaño
                   if (widget.product.sizes.isNotEmpty) ...[
-                    const Text('Selecciona el tamaño:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text('Selecciona el tamaño:',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold)),
                     const Gap(8),
                     Wrap(
                       spacing: 8,
@@ -157,9 +130,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // 2. Selector de Leche
                   if (widget.product.milkTypes.isNotEmpty) ...[
-                    const Text('Tipo de leche:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text('Tipo de leche:',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold)),
                     const Gap(4),
                     RadioGroup<CustomizationOption>(
                       groupValue: _selectedMilk,
@@ -181,9 +154,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // 3. Selector de Extras
                   if (widget.product.extras.isNotEmpty) ...[
-                    const Text('Extras sugeridos:',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text('Extras sugeridos:',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold)),
                     const Gap(4),
                     Column(
                       children: widget.product.extras.map((extra) {

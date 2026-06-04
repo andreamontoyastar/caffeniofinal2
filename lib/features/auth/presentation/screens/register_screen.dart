@@ -166,8 +166,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       duration: const Duration(milliseconds: 550),
       child: Container(
         margin: const EdgeInsets.only(top: AppSpacing.lg),
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: AppBorderRadius.topXl,
         ),
         child: SingleChildScrollView(
@@ -293,7 +293,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Text(
                     'Desarrollado por Andrea Montoya 6I',
                     style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -363,6 +363,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildTermsCheckbox() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -372,7 +373,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Checkbox(
             value: _termsAccepted,
             onChanged: (v) => setState(() => _termsAccepted = v ?? false),
-            activeColor: AppColors.primary,
+            activeColor: colorScheme.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),
@@ -383,14 +384,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: RichText(
             text: TextSpan(
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
               children: [
                 const TextSpan(text: 'Acepto los '),
                 TextSpan(
                   text: 'Términos y Condiciones',
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
                   ),
@@ -402,8 +403,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const TextSpan(text: ' y la '),
                 TextSpan(
                   text: 'Política de Privacidad',
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
                   ),
@@ -445,13 +446,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildLoginLink() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           '¿Ya tienes cuenta?',
           style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         TextButton(
@@ -460,7 +462,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 6)),
           child: Text(
             'Inicia sesión',
-            style: AppTypography.labelLarge.copyWith(color: AppColors.primary),
+            style: AppTypography.labelLarge.copyWith(color: colorScheme.primary),
           ),
         ),
       ],

@@ -60,6 +60,26 @@ class ProductModel extends Equatable {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return imageUrl!;
     }
+    
+    final nameLower = name.toLowerCase();
+    final categoryLower = categoryId.toLowerCase();
+    
+    if (nameLower.contains('muffin') || categoryLower.contains('muffin')) {
+      return 'https://images.unsplash.com/photo-1587960389599-77a6552c8e00?auto=format&fit=crop&w=600&q=80';
+    } else if (nameLower.contains('dona') || nameLower.contains('donita') || categoryLower.contains('dona')) {
+      return 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80';
+    } else if (nameLower.contains('bagel') || categoryLower.contains('bagel')) {
+      return 'https://images.unsplash.com/photo-1585478259715-876acc5be8eb?auto=format&fit=crop&w=600&q=80';
+    } else if (nameLower.contains('te') || nameLower.contains('té') || nameLower.contains('fresa') || categoryLower.contains('te') || categoryLower.contains('té')) {
+      return 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=600&q=80';
+    } else if (nameLower.contains('espresso') || nameLower.contains('espreso')) {
+      return 'https://images.unsplash.com/photo-151097252790b-af4f42d91015?auto=format&fit=crop&w=600&q=80';
+    } else if (nameLower.contains('latte')) {
+      return 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80';
+    } else if (nameLower.contains('capuchino') || nameLower.contains('cappuccino')) {
+      return 'https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=600&q=80';
+    }
+    
     // Fallback to a high-quality coffee image hosted on Unsplash
     return 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80';
   }

@@ -300,8 +300,13 @@ abstract final class AppTheme {
         backgroundColor: isDark
             ? AppColors.dark.surfaceVariant
             : AppColors.surfaceVariant,
-        selectedColor: colorScheme.primaryContainer,
-        labelStyle: AppTypography.chip,
+        selectedColor: colorScheme.primary,
+        labelStyle: AppTypography.chip.copyWith(
+          color: isDark ? Colors.white : Colors.black87,
+        ),
+        secondaryLabelStyle: AppTypography.chip.copyWith(
+          color: Colors.white,
+        ),
         side: BorderSide.none,
         shape: const RoundedRectangleBorder(
           borderRadius: AppBorderRadius.chip,
@@ -400,8 +405,12 @@ abstract final class AppTheme {
         unselectedLabelColor: isDark
             ? AppColors.dark.onSurfaceVariant
             : AppColors.onSurfaceVariant,
-        labelStyle: AppTypography.labelLarge,
-        unselectedLabelStyle: AppTypography.labelMedium,
+        labelStyle: AppTypography.labelLarge.copyWith(
+          color: isDark ? AppColors.dark.onBackground : AppColors.onBackground,
+        ),
+        unselectedLabelStyle: AppTypography.labelMedium.copyWith(
+          color: isDark ? AppColors.dark.onSurfaceVariant : AppColors.onSurfaceVariant,
+        ),
         indicator: UnderlineTabIndicator(
           borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
@@ -414,8 +423,12 @@ abstract final class AppTheme {
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
         ),
-        titleTextStyle: AppTypography.titleSmall,
-        subtitleTextStyle: AppTypography.bodySmall,
+        titleTextStyle: AppTypography.titleSmall.copyWith(
+          color: isDark ? AppColors.dark.onBackground : AppColors.onBackground,
+        ),
+        subtitleTextStyle: AppTypography.bodySmall.copyWith(
+          color: isDark ? AppColors.dark.onSurfaceVariant : AppColors.onSurfaceVariant,
+        ),
         iconColor: isDark
             ? AppColors.dark.onSurfaceVariant
             : AppColors.onSurfaceVariant,

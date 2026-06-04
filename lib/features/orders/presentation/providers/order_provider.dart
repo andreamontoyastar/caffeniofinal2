@@ -1,3 +1,4 @@
+import 'package:caffenio/core/constants/app_constants.dart';
 import 'package:caffenio/shared/models/cart_item_model.dart';
 import 'package:caffenio/shared/models/order_model.dart';
 import 'package:flutter/material.dart';
@@ -26,10 +27,15 @@ class OrderProvider extends ChangeNotifier {
     required DeliveryType deliveryType,
     required PaymentMethod paymentMethod,
     String? userId,
+    String? notes,
+    String? branchId,
+    int pointsRedeemed = 0,
   }) {
     const double taxRate = 0.16;
     final double tax = subtotal * taxRate;
-    final double total = subtotal + tax;
+    final double deliveryFee = deliveryType == DeliveryType.delivery ? 30.0 : 0.0;
+    final double discount = pointsRedeemed * AppConstants.pesoPerPoint;
+    final double total = (subtotal + tax + deliveryFee - discount).clamp(0.0, double.infinity);
 
     // ID único basado en timestamp (8 chars hex)
     final String orderId =
@@ -46,6 +52,9 @@ class OrderProvider extends ChangeNotifier {
       deliveryType: deliveryType,
       paymentMethod: paymentMethod,
       createdAt: DateTime.now(),
+      notes: notes,
+      branchId: branchId,
+      pointsRedeemed: pointsRedeemed,
     );
 
     _orders.add(order);

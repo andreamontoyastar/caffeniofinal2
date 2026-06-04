@@ -47,15 +47,15 @@ enum OrderStatus {
 
 /// Tipo de entrega seleccionado por el usuario en checkout.
 enum DeliveryType {
-  inStore,
-  toGo;
+  pickup,
+  delivery;
 
   String get label {
     switch (this) {
-      case DeliveryType.inStore:
-        return 'En sucursal';
-      case DeliveryType.toGo:
-        return 'Para llevar';
+      case DeliveryType.pickup:
+        return 'Para recoger';
+      case DeliveryType.delivery:
+        return 'A domicilio';
     }
   }
 }
@@ -165,7 +165,7 @@ class OrderModel extends Equatable {
       ),
       deliveryType: DeliveryType.values.firstWhere(
         (type) => type.name == json['deliveryType'],
-        orElse: () => DeliveryType.toGo,
+        orElse: () => DeliveryType.pickup,
       ),
       paymentMethod: PaymentMethod.values.firstWhere(
         (method) =>

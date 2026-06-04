@@ -30,6 +30,18 @@ class NotificationLocalService {
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
     } catch (_) {}
+
+    // Request permissions for iOS
+    try {
+      await _localNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+    } catch (_) {}
   }
 
   Future<void> showNotification({

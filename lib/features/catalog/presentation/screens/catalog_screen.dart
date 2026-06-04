@@ -89,7 +89,7 @@ class CatalogScreen extends StatelessWidget {
                 Text(
                   'Elige tu café ideal',
                   style: AppTypography.headlineSmall.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -97,10 +97,7 @@ class CatalogScreen extends StatelessWidget {
                 Text(
                   'Personalízalo a tu gusto con leches especiales y extras deliciosos.',
                   style: AppTypography.bodySmall.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withOpacity(0.92),
+                    color: Colors.white.withValues(alpha: 0.92),
                   ),
                 ),
               ],
@@ -160,80 +157,34 @@ class CatalogScreen extends StatelessWidget {
                                   Expanded(
                                     child: Hero(
                                       tag: 'product_image_${product.id}',
-                                      child: product.imageUrl != null &&
-                                              product.imageUrl!.isNotEmpty
-                                          ? Image.network(
-                                              product.imageUrl!,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              loadingBuilder: (context, child,
-                                                  loadingProgress) {
-                                                if (loadingProgress == null) {
-                                                  return child;
-                                                }
-                                                return const Center(
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    color: AppColors.primary,
-                                                    strokeWidth: 2.5,
-                                                  ),
-                                                );
-                                              },
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                // If the provided URL fails (404/timeout), fall back to a high-quality remote placeholder
-                                                return Image.network(
-                                                  product.displayImageUrl,
-                                                  width: double.infinity,
-                                                  fit: BoxFit.cover,
-                                                  loadingBuilder: (context,
-                                                      child, loadingProgress) {
-                                                    if (loadingProgress == null) {
-                                                      return child;
-                                                    }
-                                                    return const Center(
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        color:
-                                                            AppColors.primary,
-                                                        strokeWidth: 2.5,
-                                                      ),
-                                                    );
-                                                  },
-                                                  errorBuilder: (context,
-                                                      error2, stackTrace2) {
-                                                    // Last resort: show a simple icon
-                                                    return Container(
-                                                      color: Colors.brown[50],
-                                                      child: const Center(
-                                                        child: Icon(
-                                                          Icons
-                                                              .broken_image_outlined,
-                                                          size: 56,
-                                                          color: AppColors
-                                                              .secondary,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                );
-                                              },
-                                            )
-                                          : Container(
-                                              width: double.infinity,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainerHighest,
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.coffee,
-                                                  size: 64,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary,
-                                                ),
+                                      child: Image.network(
+                                        product.displayImageUrl,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          }
+                                          return const Center(
+                                            child: CircularProgressIndicator(
+                                              color: AppColors.primary,
+                                              strokeWidth: 2.5,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Container(
+                                            color: Colors.brown[50],
+                                            child: const Center(
+                                              child: Icon(
+                                                Icons.broken_image_outlined,
+                                                size: 56,
+                                                color: AppColors.secondary,
                                               ),
                                             ),
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ),
                                   // Información del producto

@@ -68,17 +68,16 @@ class AdminProductsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (product.imageUrl != null && product.imageUrl!.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    product.imageUrl!,
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
-                  ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  product.displayImageUrl,
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
                 ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               Text(product.description, style: theme.textTheme.bodyMedium),
               const SizedBox(height: AppSpacing.sm),
@@ -153,21 +152,14 @@ class AdminProductsScreen extends StatelessWidget {
         ),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-              ? Image.network(
-                  product.imageUrl!,
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.broken_image_outlined),
-                )
-              : Container(
-                  width: 64,
-                  height: 64,
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  child: Icon(Icons.coffee, color: theme.colorScheme.primary),
-                ),
+          child: Image.network(
+            product.displayImageUrl,
+            width: 64,
+            height: 64,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.broken_image_outlined),
+          ),
         ),
         title: Text(product.name, style: theme.textTheme.titleMedium),
         subtitle: Text(

@@ -130,7 +130,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: subtotal,
-        deliveryType: DeliveryType.toGo,
+        deliveryType: DeliveryType.pickup,
         paymentMethod: PaymentMethod.card,
       );
 
@@ -140,11 +140,33 @@ void main() {
       expect(order.total, closeTo(70.0 * 1.16, 0.001)); // 81.2
     });
 
+    test('placeOrder should apply discount and save branchId and pointsRedeemed', () {
+      final subtotal = cartProvider.subtotal; // 70.0
+
+      final order = orderProvider.placeOrder(
+        items: cartProvider.items,
+        subtotal: subtotal,
+        deliveryType: DeliveryType.pickup,
+        paymentMethod: PaymentMethod.wallet,
+        branchId: 'branch_abc',
+        pointsRedeemed: 150, // $15.00 MXN discount
+      );
+
+      // totalBeforeDiscount = 70.0 + 11.2 = 81.2
+      // discount = 150 * 0.10 = 15.0
+      // expectedTotal = 81.2 - 15.0 = 66.2
+      expect(order.subtotal, 70.0);
+      expect(order.tax, closeTo(11.2, 0.001));
+      expect(order.total, closeTo(66.2, 0.001));
+      expect(order.branchId, 'branch_abc');
+      expect(order.pointsRedeemed, 150);
+    });
+
     test('placeOrder should set status to pending', () {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.inStore,
+        deliveryType: DeliveryType.pickup,
         paymentMethod: PaymentMethod.cash,
       );
 
@@ -155,7 +177,7 @@ void main() {
       orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.toGo,
+        deliveryType: DeliveryType.pickup,
         paymentMethod: PaymentMethod.wallet,
       );
 
@@ -167,7 +189,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.toGo,
+        deliveryType: DeliveryType.pickup,
         paymentMethod: PaymentMethod.card,
       );
 
@@ -180,7 +202,7 @@ void main() {
       final order = orderProvider.placeOrder(
         items: cartProvider.items,
         subtotal: cartProvider.subtotal,
-        deliveryType: DeliveryType.toGo,
+        deliveryType: DeliveryType.pickup,
         paymentMethod: PaymentMethod.card,
       );
 

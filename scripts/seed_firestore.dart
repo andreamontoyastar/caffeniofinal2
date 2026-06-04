@@ -14,9 +14,6 @@ class FirestoreSeeder {
     // Base de la URL para las imágenes en GitHub verificadas.
     const String baseUrl =
         'https://raw.githubusercontent.com/montoya06470/Imagenes-para-flutter-6to-I-fecha-11-feb-2026/refs/heads/main';
-    // Valor alternativo para las imágenes cuando el host original no está disponible.
-    const String placeholderImageUrl =
-        'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80';
 
     // 1. DEFINICIÓN DE CATEGORÍAS (Estructura base)
     final Map<String, Map<String, dynamic>> categories = {
@@ -155,59 +152,6 @@ class FirestoreSeeder {
           {'name': 'Extra Jarabe de Chocolate', 'priceExtra': 8.0},
           {'name': 'Crema Batida', 'priceExtra': 10.0},
         ],
-      },
-
-      // --- BEBIDAS FRÍAS & TÉS ---
-      {
-        'id': 'prod_te_fresa',
-        'categoria_id': 'cat_bebidas_frias',
-        'nombre': 'Té Helado Fresa Herbal',
-        'descripcion':
-            'Infusión natural fría de frutos rojos y hojas de té seleccionadas, endulzado ligeramente y servido con hielo.',
-        'precio': 42.0,
-        'imageUrl': placeholderImageUrl,
-        'disponible': true,
-        'isFeatured': false,
-        'sizes': <Map<String, dynamic>>[
-          {'name': 'Mediano', 'priceExtra': 0.0},
-          {'name': 'Grande', 'priceExtra': 10.0},
-        ],
-        'milkTypes': <Map<String, dynamic>>[],
-        'extras': <Map<String, dynamic>>[
-          {'name': 'Toque de Limón', 'priceExtra': 0.0},
-          {'name': 'Endulzante Splenda', 'priceExtra': 0.0},
-        ],
-      },
-
-      // --- PANADERÍA & REPOSTERÍA ---
-      {
-        'id': 'prod_muffin',
-        'categoria_id': 'cat_reposteria',
-        'nombre': 'Muffin de Chispas de Chocolate',
-        'descripcion':
-            'Panecillo horneado estilo de la casa, esponjoso y cargado con abundantes chispas de chocolate de primera calidad.',
-        'precio': 35.0,
-        'imageUrl':
-            '', // Dejar vacío si se usa icono vectorial o agregar imagen correspondiente
-        'disponible': true,
-        'isFeatured': false,
-        'sizes': <Map<String, dynamic>>[],
-        'milkTypes': <Map<String, dynamic>>[],
-        'extras': <Map<String, dynamic>>[],
-      },
-      {
-        'id': 'prod_donita',
-        'categoria_id': 'cat_reposteria',
-        'nombre': 'Dona Glaseada Tradicional',
-        'descripcion':
-            'Suave dona de masa madre con un glaseado cristalino clásico que combina idealmente con tu café caliente.',
-        'precio': 28.0,
-        'imageUrl': '',
-        'disponible': true,
-        'isFeatured': false,
-        'sizes': <Map<String, dynamic>>[],
-        'milkTypes': <Map<String, dynamic>>[],
-        'extras': <Map<String, dynamic>>[],
       }
     ];
 

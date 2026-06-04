@@ -174,12 +174,15 @@ class _LoginScreenState extends State<LoginScreen> {
   // ── Tarjeta del formulario ────────────────────────────────────────────────
 
   Widget _buildFormCard(Size size) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return FadeInUp(
       duration: const Duration(milliseconds: 600),
       child: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
           borderRadius: AppBorderRadius.topXl,
         ),
         child: SingleChildScrollView(
@@ -215,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       '¿Olvidaste tu contraseña?',
                       style: AppTypography.labelMedium.copyWith(
-                        color: AppColors.primary,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
@@ -239,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text(
                     'Desarrollado por Andrea Montoya 6I',
                     style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -342,7 +345,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Text(
             'o continúa con',
             style: AppTypography.labelSmall.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -352,13 +355,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildGoogleButton() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
         return OutlinedButton(
           onPressed: auth.isActionLoading ? null : _signInWithGoogle,
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.onBackground,
-            side: const BorderSide(color: AppColors.outline),
+            foregroundColor: colorScheme.onSurface,
+            side: BorderSide(color: colorScheme.outline),
             minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
             shape: const RoundedRectangleBorder(
               borderRadius: AppBorderRadius.button,
@@ -389,7 +393,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 'Continuar con Google',
                 style: AppTypography.button.copyWith(
-                  color: AppColors.onBackground,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
@@ -400,11 +404,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildRegisterButton() {
+    final colorScheme = Theme.of(context).colorScheme;
     return OutlinedButton(
       onPressed: () => context.push(RouteConstants.register),
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
+        foregroundColor: colorScheme.primary,
+        side: BorderSide(color: colorScheme.primary),
         minimumSize: const Size(double.infinity, AppSpacing.buttonHeight),
         shape: const RoundedRectangleBorder(
           borderRadius: AppBorderRadius.button,
@@ -413,7 +418,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Text(
         'Registrarse',
         style: AppTypography.button.copyWith(
-          color: AppColors.primary,
+          color: colorScheme.primary,
         ),
       ),
     );

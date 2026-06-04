@@ -1,4 +1,3 @@
-import 'package:caffenio/core/constants/app_constants.dart';
 import 'package:caffenio/core/constants/firebase_constants.dart';
 import 'package:caffenio/core/errors/auth_error_mapper.dart';
 import 'package:caffenio/core/errors/exceptions.dart';
@@ -6,9 +5,8 @@ import 'package:caffenio/features/auth/data/models/user_model.dart';
 import 'package:caffenio/features/notifications/data/notifications_remote_datasource.dart';
 import 'package:caffenio/firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 abstract class AuthRemoteDataSource {
@@ -133,6 +131,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> signInWithGoogle() async {
+    // Verificar conexión a internet antes de iniciar
+    final connectivityResults = await Connectivity().checkConnectivity();
+    final hasConnection = connectivityResults.any((r) => r != ConnectivityResult.none);
+    if (!hasConnection) {
+      throw const AuthException(
+        message: 'No hay conexión a internet. Por favor, verifica tu red e intenta de nuevo.',
+      );
+    }
+
     try {
       await _googleSignIn.signOut();
       final googleAccount = await _googleSignIn.signIn();
@@ -154,6 +161,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       throw AuthErrorMapper.fromFirebaseAuthException(e);
     } catch (e) {
+      // Verificar conexión de red en caso de error genérico
+      final checkAgain = await Connectivity().checkConnectivity();
+      final connected = checkAgain.any((r) => r != ConnectivityResult.none);
+      if (!connected || e.toString().contains('SocketException') || e.toString().contains('Network')) {
+        throw const AuthException(
+          message: 'No hay conexión a internet. Por favor, verifica tu red e intenta de nuevo.',
+        );
+      }
       throw const AuthException(message: 'Error al iniciar sesión con Google. Verifica tu configuración SHA-1.');
     }
   }
@@ -269,7 +284,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> _createUserDocument(UserModel user) async {
     await _firestore.collection(FirebaseConstants.usersCollection).doc(user.uid).set({
       'uid': user.uid,
-      'email': user.email?.toLowerCase().trim(),
+      'email': user.email.toLowerCase().trim(),
       'displayName': user.displayName?.trim() ?? 'Cliente Caffenio',
       'phone': user.phone?.trim() ?? '',
       'role': 'customer',
